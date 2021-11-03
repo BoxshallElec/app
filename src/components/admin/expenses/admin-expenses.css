@@ -1,0 +1,65 @@
+.status-card {
+  height: 64px;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #333;
+  margin: 8px 0;
+}
+
+.status-card > div:nth-child(1) {
+  border-right: 1px solid #ddd;
+}
+
+.status-card > div {
+  height: 100%;
+}
+
+.status-card > div:nth-child(2) {
+  width: 100%;
+  padding-left: 8px;
+}
+
+.status-count {
+  min-width: 60px;
+}
+
+.status-card.selected > div:nth-child(1),
+.status-card:hover > div:nth-child(1) {
+  background: #e64a19 !important;
+  color: #fff;
+}
+
+.status-card.selected > div:nth-child(2),
+.status-card:hover > div:nth-child(2) {
+  background: #ff8a65 !important;
+  color: #fff;
+}
+
+.accordion:after {
+  content: "\002B";
+  color: #777;
+  font-weight: bold;
+  /*float: right;
+  margin-left: 5px;*/
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.accordion.active:after {
+  content: "\2212";
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.withoutMargin {
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+.tab-content {
+  padding: 1.25rem;
+  border: 1px solid #e6ecf1;
+  border-radius: 0.25rem;
+  background-color: #fff;
+}

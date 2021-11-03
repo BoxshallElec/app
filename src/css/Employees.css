@@ -1,0 +1,16 @@
+div.react-datepicker__input-container input {
+  width: 100% !important;
+  border: none;
+}
+
+div.react-datepicker__input-container {
+  background: white;
+}
+
+div.input-group.input-group-alternative {
+  background: white !important;
+}
+
+.rounded-circle {
+  height: 36px !important;
+}

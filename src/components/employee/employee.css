@@ -1,0 +1,17 @@
+.employee-time-sheet-filter>* {
+    padding: 0 8px;
+}
+
+.employee-time-sheet-filter>label {
+    padding: 8px 16px;
+    cursor: pointer;
+    background: #fff;
+    margin: 0 8px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    height: 46px;
+}
+
+.employee-time-sheet-filter>label.selected, .employee-time-sheet-filter>label:hover {
+    border: 2px solid #5e72e4;
+}

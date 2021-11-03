@@ -1,0 +1,45 @@
+.status-card {
+  height: 64px;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #333;
+  margin: 8px 0;
+}
+
+.status-card > div:nth-child(1) {
+  border-right: 1px solid #ddd;
+}
+
+.status-card > div {
+  height: 100%;
+}
+
+.status-card > div:nth-child(2) {
+  width: 100%;
+  padding-left: 8px;
+}
+
+.status-count {
+  min-width: 60px;
+}
+
+.status-card.selected > div:nth-child(1),
+.status-card:hover > div:nth-child(1) {
+  background: #e64a19 !important;
+  color: #fff;
+}
+
+.status-card.selected > div:nth-child(2),
+.status-card:hover > div:nth-child(2) {
+  background: #ff8a65 !important;
+  color: #fff;
+}
+
+.removeContent {
+  display: none;
+}
+
+.marginBottom {
+  margin-bottom: 6px;
+}
