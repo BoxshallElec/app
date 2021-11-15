@@ -110,6 +110,7 @@ class SideNav extends Component {
     }
 
     this.props.setComponent(component, type, header);
+    
   };
 
   handleLogout = (event) => {
@@ -119,8 +120,11 @@ class SideNav extends Component {
     localStorage.removeItem("name");
     this.props.setLogout();
   };
-
+  
   render() {
+    console.log("Check");
+    console.log(this.state); 
+    console.log(this.state.accessLevels.indexOf("TIMESHEETS"));
     return (
       <nav
         className="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white"
@@ -205,7 +209,8 @@ class SideNav extends Component {
             <h6 className="navbar-heading text-muted">My Workspace</h6>
             <h5>Trial</h5>
             <ul className="navbar-nav">
-              {/* {this.state.accessLevels && this.state.accessLevels.indexOf("TIMESHEETS") != -1 ? ( */}
+              {console.log(this.state.accessLevels)}
+              {this.state.accessLevels ? (
                 <li className="nav-item">
                   <a
                     className={this.isActive("mytime")}
@@ -227,9 +232,9 @@ class SideNav extends Component {
                     My Time
                   </a>
                 </li>
-              {/* ) : (
+              ) : (
                 ""
-              )} */}
+              )}
               {/* {this.state.accessLevels.indexOf("EXPENSES") != -1 ? ( */}
                 <li className="nav-item">
                   <a
@@ -254,7 +259,7 @@ class SideNav extends Component {
                 </li>
               {/* ) : (
                 ""
-              )} */}
+              )}  */}
               {/* {this.state.accessLevels.indexOf("TIMESHEETS") != -1 ? ( */}
                 <li className="nav-item">
                   <a
@@ -279,7 +284,7 @@ class SideNav extends Component {
                 </li>
               {/* ) : (
                 ""
-              )} */}
+              )}  */}
             </ul>
             {this.state.role && this.state.role == "Admin" ? (
               <React.Fragment>
