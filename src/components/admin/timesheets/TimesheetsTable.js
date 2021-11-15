@@ -99,6 +99,7 @@ class TimesheetsTable extends Component {
     var isChecked = event.target.checked;
     var timesheetData = this.props.timesheetData;
     var keys = Object.keys(timesheetData);
+    console.log(Object);
     var timesheetIds = this.state.timesheetIds;
     if (!name.includes("cust") && name.includes("table")) {
       var index = name.split("_")[1];
@@ -183,6 +184,13 @@ class TimesheetsTable extends Component {
     var keys = this.props.timesheetData
       ? Object.keys(this.props.timesheetData)
       : [];
+    console.log("Error")
+    // console.log(this.props.timesheetData[keys[0]]);
+    var temp = this.props.timesheetData[0];
+    temp = JSON.stringify(temp);
+    // temp = JSON.parse(temp);
+    console.log(temp);
+    console.log(keys.length);
     for (var i = 0; i < keys.length; i++) {
       content.push(
         <table className="table align-items-center table-flush mt-2">
@@ -212,7 +220,8 @@ class TimesheetsTable extends Component {
             </tr>
           </thead>
           <tbody class="list">
-            {this.getCustomerTable(this.props.timesheetData[keys[i]].value, i)}
+          {/* {this.getCustomerTable(this.props.timesheetData[keys[i]].value, i)} */}
+            {this.getCustomerTable(this.props.timesheetData[keys[i]], i)}
           </tbody>
         </table>
       );
@@ -221,7 +230,11 @@ class TimesheetsTable extends Component {
   }
   getCustomerTable(tesDetails, index) {
     var content = [];
+    console.log('test');
+    console.log(index);
     var keys = Object.keys(tesDetails);
+    console.log(keys.length);
+    // var keys = 5;
     for (var i = 0; i < keys.length; i++) {
       content.push(
         <React.Fragment>
@@ -273,7 +286,8 @@ class TimesheetsTable extends Component {
           <tr className="removeContent" id={"table" + index + "_cust" + index}>
             <table>
               <tbody>
-                {this.buildTimesheetDetails(tesDetails[keys[i]].value)}
+                {/* {this.buildTimesheetDetails(tesDetails[keys[i]].value)} */}
+                {this.buildTimesheetDetails(tesDetails)} 
               </tbody>
             </table>
           </tr>
@@ -285,7 +299,11 @@ class TimesheetsTable extends Component {
   buildTimesheetDetails(custDetails) {
     var content = [];
     // for (var i = 0; i < custDetails.length; i++) {
-    content = custDetails.map((tesData, index) => {
+    console.log("custDetails");
+    console.log(custDetails);
+    var tesData = custDetails;
+
+    // content = custDetails.map((tesData, index) => {
       return (
         <React.Fragment>
           {() => this.renderGallery()}
@@ -326,7 +344,7 @@ class TimesheetsTable extends Component {
               </div>
               <div>
                 <span>Client</span>
-                <p>{tesData["client"][0].DisplayName}</p>
+                {/* <p>{tesData["client"][0].DisplayName}</p> */}
               </div>
               {tesData["Description"] ? (
                 <div>
@@ -391,10 +409,10 @@ class TimesheetsTable extends Component {
           </tr>
         </React.Fragment>
       );
-    });
+    
     //content.push();
     //}
-    return content;
+    // return content;
   }
   showContent(event) {
     document
