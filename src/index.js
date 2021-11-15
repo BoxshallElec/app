@@ -22,8 +22,8 @@ ReactDOM.render(
         <Route exact path="/login" component={Login} />
         <Route exact path="/register" component={AddEmployee} />
         <PrivateRoute exact path="/changePassword" component={ChangePassword} />
-        <PrivateRoute exact path="/" component={Login} />
-        <PrivateRoute exact path="" component={Login} />
+        <PrivateRoute exact path="/" component={Home} />
+        <PrivateRoute exact path="" component={Home} />
       </Switch>
     </Router>
   </ConfirmDialogProvider>,
@@ -39,7 +39,7 @@ function PrivateRoute({ component: Component, ...rest }) {
           <Component {...props} />
         ) : (
             <Redirect
-              to={{ pathname: "/register", state: { from: props.location } }}
+              to={{ pathname: "/login", state: { from: props.location } }}
             />
           )
       }

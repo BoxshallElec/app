@@ -47,6 +47,8 @@ class Login extends Component {
         if (response.data.success) {
           console.log("URL:");
           console.log(url);
+	  console.log("Response");
+	  console.log(response.data);
           var displayName = response.data.employee.DisplayName
             ? response.data.employee.DisplayName
             : response.data.employee.displayName;
@@ -79,7 +81,8 @@ class Login extends Component {
       .catch(function (error) {
         self.setState({ loading: false });
         ToastsStore.error(error.message);
-        console.log(error);
+        console.log("error");
+	console.log(error.response.data.message);
       });
   };
 
