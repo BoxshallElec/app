@@ -110,6 +110,7 @@ class SideNav extends Component {
     }
 
     this.props.setComponent(component, type, header);
+    
   };
 
   handleLogout = (event) => {
@@ -119,8 +120,11 @@ class SideNav extends Component {
     localStorage.removeItem("name");
     this.props.setLogout();
   };
-
+  
   render() {
+    console.log("Check");
+    console.log(this.state); 
+    console.log(this.state.accessLevels.indexOf("TIMESHEETS"));
     return (
       <nav
         className="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white"
@@ -205,7 +209,12 @@ class SideNav extends Component {
             <h6 className="navbar-heading text-muted">My Workspace</h6>
             <h5>Trial</h5>
             <ul className="navbar-nav">
+<<<<<<< HEAD
               {this.state.accessLevels && this.state.accessLevels.indexOf("TIMESHEETS") != -1 ? (
+=======
+              {console.log(this.state.accessLevels)}
+              {this.state.accessLevels ? (
+>>>>>>> 120094b4b82135e0eb97760f2282a1466115bd08
                 <li className="nav-item">
                   <a
                     className={this.isActive("mytime")}
@@ -227,10 +236,17 @@ class SideNav extends Component {
                     My Time
                   </a>
                 </li>
+<<<<<<< HEAD
                ) : (
                 ""
               )}
               {this.state.accessLevels.indexOf("EXPENSES") != -1 ? (
+=======
+              ) : (
+                ""
+              )}
+              {/* {this.state.accessLevels.indexOf("EXPENSES") != -1 ? ( */}
+>>>>>>> 120094b4b82135e0eb97760f2282a1466115bd08
                 <li className="nav-item">
                   <a
                     className={this.isActive("myexpenses")}
@@ -254,8 +270,13 @@ class SideNav extends Component {
                 </li>
                ) : (
                 ""
+<<<<<<< HEAD
               )}
               {this.state.accessLevels.indexOf("TIMESHEETS") != -1 ? (
+=======
+              )}  */}
+              {/* {this.state.accessLevels.indexOf("TIMESHEETS") != -1 ? ( */}
+>>>>>>> 120094b4b82135e0eb97760f2282a1466115bd08
                 <li className="nav-item">
                   <a
                     className={this.isActive("approve-timesheets")}
@@ -279,7 +300,11 @@ class SideNav extends Component {
                 </li>
               ) : (
                 ""
+<<<<<<< HEAD
               )}
+=======
+              )}  */}
+>>>>>>> 120094b4b82135e0eb97760f2282a1466115bd08
             </ul>
             {this.state.role && this.state.role == "Admin" ? (
               <React.Fragment>

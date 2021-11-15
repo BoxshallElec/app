@@ -52,11 +52,16 @@ class Login extends Component {
           var displayName = response.data.employee.DisplayName
             ? response.data.employee.DisplayName
             : response.data.employee.displayName;
-          var access = response.data.employee.access
-            ? response.data.employee.access
-            : response.data.access
-            ? response.data.access
-            : [];
+          console.log("Access:");
+          // console.log(response.data.employee.access);
+          console.log(response.data.employee.type);
+          // console.log(response.data.access);
+          var access = response.data.employee.type=="employee" ? 2 : 1;
+          // var access = response.data.employee.access
+          //   ? response.data.employee.access
+          //   : response.data.access
+          //   ? response.data.access
+          //   : [];
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("name", displayName);
           localStorage.setItem("access", access);
