@@ -177,6 +177,9 @@ class MyTime extends Component {
     //   }
     // }
     this.setState({ clientId: event.target.value });
+
+    this.setState({value: event.target.value});
+
     // this.setState({ clientId: "demo" });
   };
 
@@ -817,7 +820,7 @@ class MyTime extends Component {
                                   name="clientId"
                                   id="client"
                                   // value="lol"
-                                  value={this.state.clients}
+                                  value={this.state.value}
                                   onChange={this.handleClientChange}
                                 >
                                   
