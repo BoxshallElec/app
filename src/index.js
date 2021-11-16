@@ -22,8 +22,8 @@ ReactDOM.render(
         <Route exact path="/login" component={Login} />
         <Route exact path="/register" component={AddEmployee} />
         <PrivateRoute exact path="/changePassword" component={ChangePassword} />
-        <PrivateRoute exact path="/" component={Login} />
-        <PrivateRoute exact path="" component={Login} />
+        <PrivateRoute exact path="/" component={Home} />
+        <PrivateRoute exact path="" component={Home} />
       </Switch>
     </Router>
   </ConfirmDialogProvider>,
