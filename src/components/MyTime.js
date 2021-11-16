@@ -50,6 +50,9 @@ class MyTime extends Component {
       clientTasks: {},
       taskDropdown: [],
       clientList: [],
+      clientValue:"default",
+      serviceValue:"default",
+      isVariation: false,
     };
   }
 
@@ -158,6 +161,7 @@ class MyTime extends Component {
 
   toggleChange = (event) => {
     this.setState({ isBillable: !this.state.isBillable });
+    this.setState({ isVariation: !this.state.isVariation });
   };
 
   handleChange = (event) => {
@@ -194,7 +198,7 @@ class MyTime extends Component {
     // }
     this.setState({ clientId: event.target.value });
 
-    this.setState({value: event.target.value});
+    this.setState({clientValue: event.target.value});
 
     // this.setState({ clientId: "demo" });
   };
@@ -211,10 +215,17 @@ class MyTime extends Component {
     // }
     this.setState({ taskId: event.target.value });
 
-    this.setState({selectValue: event.target.value});
+    this.setState({serviceValue: event.target.value});
 
     // this.setState({ clientId: "demo" });
   };
+  // toggleVariationChange = (event) => {
+  //   if(event.target.checked){
+  //     this.setState({isVariation:true});
+  //   }
+  //   this.setState({ isVariation: !this.state.isVariation });
+  //   console.log(this.state.isVariation);
+  // }
   handleSubmit = (event) => {
     event.preventDefault();
 
@@ -848,11 +859,11 @@ class MyTime extends Component {
                                   className="form-control input-group input-group-alternative"
                                   name="clientId"
                                   id="client"
-                                  // value="lol"
-                                  value={this.state.value}
+                                  value="lol"
+                                  value={this.state.clientValue}
                                   onChange={this.handleClientChange}
                                 >
-                                  
+                                  <option value="default">Choose Client</option>
                                   {/* {this.state.clients.map((client, index) => (
                                     <React.Fragment>
                                       <option
@@ -900,7 +911,7 @@ class MyTime extends Component {
                                   className="form-control input-group input-group-alternative"
                                   name="taskId"
                                   id="task"
-                                  value={this.state.selectValue}
+                                  value={this.state.serviceValue}
                                   onChange={this.handleTaskChange}
                                 >
                                   {/* {this.state.taskDropdown
@@ -917,6 +928,7 @@ class MyTime extends Component {
                                         )
                                       )
                                     : ""} */}
+                                    <option value="default">Choose Service</option>
                                     {this.state.taskList.map((tasksList, index) => {
                                     return <option value={tasksList.FullyQualifiedName}>{tasksList.FullyQualifiedName}</option>;
                                   })}
@@ -966,14 +978,16 @@ class MyTime extends Component {
                               </div>
                             </div>
                             <div className="col-lg-6">
-                              <div className="form-group">
+                            {this.state.isVariation ? (
+                              <div className="form-group" >
+                                
                                 <label
                                   className="form-control-label"
                                   htmlFor="input-last-name"
                                 >
                                   Variation Notes
-                                </label>
-                                <textarea
+                                </label> 
+                                <textarea 
                                   rows="4"
                                   cols="50"
                                   id="input-last-name"
@@ -985,6 +999,8 @@ class MyTime extends Component {
                                   required={this.state.isBillable}
                                 />
                               </div>
+                              ):(<div>{console.log(this.state.isVariation)}</div>)}
+                            
                             </div>
                             <div className="col-lg-12">
                               <div className="form-group">
@@ -1088,6 +1104,7 @@ class MyTime extends Component {
               </tr>
             </thead>
             <tbody>
+              {console.log(this.state.timesheets)}
               {this.state.timesheets.map((timesheet, index) => (
                 <tr key={index}>
                   <td>
