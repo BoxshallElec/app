@@ -56,6 +56,28 @@ class MyTime extends Component {
   componentDidMount() {
     this.getMyTimeSheets();
     this.getClients();
+    this.getService();
+  }
+  getService = () => {
+    var url = Constants.BASE_URL + "task/list";
+    var self = this;
+    var payload = {
+      token: localStorage.getItem("token"),
+    };
+    axios
+      .post(url,payload)
+      .then(function(response){
+        if(response.data.success){
+          console.log(response.data.data);
+          self.setState({taskList:response.data.data});
+        }
+      })
+      .catch(function(error){
+        self.setState({
+          isLoading: false,
+        });
+        console.log(error);
+      });
   }
   getClients = () => {
     // this.setState({
@@ -72,8 +94,6 @@ class MyTime extends Component {
       .post(url, payload)
       .then(function (response) {
         if (response.data.success) {
-          console.log("ClientList")
-          console.log(response.data.data);
           self.setState({
             clientList: response.data.data,
           });
@@ -101,8 +121,6 @@ class MyTime extends Component {
       .post(url, payload)
       .then(function (response) {
         if (response.data.success) {
-          console.log("Timesheet")
-          console.log(response.data.data);
           self.setState({
             timesheets: response.data.data,
             isLoading: false,
@@ -123,7 +141,6 @@ class MyTime extends Component {
     axios
       .post(url, payload)
       .then(function (response) {
-        console.log(response.data);
         if (response.data.success) {
           self.setState({
             clients: response.data.clients,
@@ -165,7 +182,6 @@ class MyTime extends Component {
   };
 
   handleClientChange = (event) => {
-    console.log(event.target.value);
     // if (this.state.clientTasks) {
     //   var tasks = this.state.clientTasks[event.target.value];
     //   if (tasks && tasks.length) {
@@ -182,7 +198,23 @@ class MyTime extends Component {
 
     // this.setState({ clientId: "demo" });
   };
+  handleTaskChange = (event) => {
+    // if (this.state.clientTasks) {
+    //   var tasks = this.state.clientTasks[event.target.value];
+    //   if (tasks && tasks.length) {
+    //     this.setState({
+    //       taskDropdown: this.state.tasks.filter(
+    //         (task) => tasks.indexOf(task["Id"]) != -1
+    //       ),
+    //     });
+    //   }
+    // }
+    this.setState({ taskId: event.target.value });
 
+    this.setState({value: event.target.value});
+
+    // this.setState({ clientId: "demo" });
+  };
   handleSubmit = (event) => {
     event.preventDefault();
 
@@ -260,7 +292,6 @@ class MyTime extends Component {
       images: images,
       empId: self.state.empData["Id"],
     };
-    console.log(self.state.clientId);
     $("#call-modal-form").removeClass("show");
     $("#call-modal-form").css("display", "");
     $(".modal-backdrop.fade.show").remove();
@@ -269,7 +300,6 @@ class MyTime extends Component {
       .post(url, payload)
       .then(function (response) {
         if (response.data.success) {
-          console.log(response.data.data.CustomerRef.value);
           let fileUpload = document.getElementById("file_upload");
           if (fileUpload) {
             fileUpload["value"] = "";
@@ -309,7 +339,6 @@ class MyTime extends Component {
       .post(url, payload)
       .then(function (response) {
         if (response.data.success) {
-          console.log(response.data.data);
           self.setState({
             timesheets: response.data.data,
             isLoading: false,
@@ -852,7 +881,6 @@ class MyTime extends Component {
                                   ))} */} 
                                   
                                   {this.state.clientList.map((clientsList, index) => {
-                                    {console.log(clientsList.CompanyName)}
                                     return <option value={clientsList.CompanyName}>{clientsList.CompanyName}</option>;
                                   })}
                                 </select>
@@ -872,11 +900,10 @@ class MyTime extends Component {
                                   className="form-control input-group input-group-alternative"
                                   name="taskId"
                                   id="task"
-                                  value={this.state.taskId}
-                                  onChange={this.handleChange}
+                                  value={this.state.value}
+                                  onChange={this.handleTaskChange}
                                 >
-                                  <option value=""></option>
-                                  {this.state.taskDropdown
+                                  {/* {this.state.taskDropdown
                                     ? this.state.taskDropdown.map(
                                         (task, index) => (
                                           <React.Fragment>
@@ -889,7 +916,10 @@ class MyTime extends Component {
                                           </React.Fragment>
                                         )
                                       )
-                                    : ""}
+                                    : ""} */}
+                                    {this.state.taskList.map((tasksList, index) => {
+                                    return <option value={tasksList.FullyQualifiedName}>{tasksList.FullyQualifiedName}</option>;
+                                  })}
                                 </select>
                               </div>
                             </div>
