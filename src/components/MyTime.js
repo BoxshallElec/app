@@ -211,7 +211,7 @@ class MyTime extends Component {
     // }
     this.setState({ taskId: event.target.value });
 
-    this.setState({value: event.target.value});
+    this.setState({selectValue: event.target.value});
 
     // this.setState({ clientId: "demo" });
   };
@@ -900,7 +900,7 @@ class MyTime extends Component {
                                   className="form-control input-group input-group-alternative"
                                   name="taskId"
                                   id="task"
-                                  value={this.state.value}
+                                  value={this.state.selectValue}
                                   onChange={this.handleTaskChange}
                                 >
                                   {/* {this.state.taskDropdown
