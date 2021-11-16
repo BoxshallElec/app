@@ -49,13 +49,43 @@ class MyTime extends Component {
       empData: {},
       clientTasks: {},
       taskDropdown: [],
+      clientList: [],
     };
   }
 
   componentDidMount() {
     this.getMyTimeSheets();
+    this.getClients();
   }
+  getClients = () => {
+    // this.setState({
+    //   clientId: "demo", 
+    // });
+    var self = this;
 
+    var payload = {
+      token: localStorage.getItem("token"),
+    };
+
+    var url = Constants.BASE_URL + "client/list";
+    axios
+      .post(url, payload)
+      .then(function (response) {
+        if (response.data.success) {
+          console.log("ClientList")
+          console.log(response.data.data);
+          self.setState({
+            clientList: response.data.data,
+          });
+        }
+      })
+      .catch(function (error) {
+        self.setState({
+          isLoading: false,
+        });
+        console.log(error);
+      });
+  };
   getMyTimeSheets = () => {
     Moment.locale("en");
 
@@ -71,6 +101,7 @@ class MyTime extends Component {
       .post(url, payload)
       .then(function (response) {
         if (response.data.success) {
+          console.log("Timesheet")
           console.log(response.data.data);
           self.setState({
             timesheets: response.data.data,
@@ -85,7 +116,7 @@ class MyTime extends Component {
         });
         console.log(error);
       });
-
+      
     //url = Constants.BASE_URL + "employee/categories";
     url = Constants.BASE_URL + "employee/getEmployeeDetails";
 
@@ -134,17 +165,19 @@ class MyTime extends Component {
   };
 
   handleClientChange = (event) => {
-    if (this.state.clientTasks) {
-      var tasks = this.state.clientTasks[event.target.value];
-      if (tasks && tasks.length) {
-        this.setState({
-          taskDropdown: this.state.tasks.filter(
-            (task) => tasks.indexOf(task["Id"]) != -1
-          ),
-        });
-      }
-    }
+    console.log(event.target.value);
+    // if (this.state.clientTasks) {
+    //   var tasks = this.state.clientTasks[event.target.value];
+    //   if (tasks && tasks.length) {
+    //     this.setState({
+    //       taskDropdown: this.state.tasks.filter(
+    //         (task) => tasks.indexOf(task["Id"]) != -1
+    //       ),
+    //     });
+    //   }
+    // }
     this.setState({ clientId: event.target.value });
+    // this.setState({ clientId: "demo" });
   };
 
   handleSubmit = (event) => {
@@ -224,7 +257,7 @@ class MyTime extends Component {
       images: images,
       empId: self.state.empData["Id"],
     };
-
+    console.log(self.state.clientId);
     $("#call-modal-form").removeClass("show");
     $("#call-modal-form").css("display", "");
     $(".modal-backdrop.fade.show").remove();
@@ -233,7 +266,7 @@ class MyTime extends Component {
       .post(url, payload)
       .then(function (response) {
         if (response.data.success) {
-          console.log(response.data);
+          console.log(response.data.data.CustomerRef.value);
           let fileUpload = document.getElementById("file_upload");
           if (fileUpload) {
             fileUpload["value"] = "";
@@ -255,6 +288,7 @@ class MyTime extends Component {
       .catch(function (error) {
         self.setState({ loading: false });
       });
+     
   };
 
   handlePageClick = (data) => {
@@ -639,6 +673,7 @@ class MyTime extends Component {
   };
 
   render() {
+    
     return this.state.isLoading ? (
       <div className="centered">
         <ReactLoading
@@ -776,24 +811,47 @@ class MyTime extends Component {
                                 >
                                   Client
                                 </label>
+                                
                                 <select
                                   className="form-control input-group input-group-alternative"
                                   name="clientId"
                                   id="client"
-                                  value={this.state.clientId}
+                                  // value="lol"
+                                  value={this.state.clients}
                                   onChange={this.handleClientChange}
                                 >
-                                  <option value=""></option>
-                                  {this.state.clients.map((client, index) => (
+                                  
+                                  {/* {this.state.clients.map((client, index) => (
                                     <React.Fragment>
                                       <option
                                         value={client._id}
                                         key={`client${index}`}
                                       >
                                         {client.FullyQualifiedName}
+                                        
                                       </option>
                                     </React.Fragment>
-                                  ))}
+                                  
+                                  ))} */}
+                                  {/* <option>{this.state.clientList}</option> */}
+                                  {/* {this.state.clientList.map((client, index) => (
+                                    <React.Fragment>
+                                      <option
+                                        value={client._id}
+                                        // key={`client${index}`}
+                                      >
+                                        {/* {client.FullyQualifiedName} */}
+                                        {/* {client[0].Hours} */}
+                                        {/* {console.log(client[0])}
+                                      </option>
+                                    </React.Fragment>
+                                  
+                                  ))} */} 
+                                  
+                                  {this.state.clientList.map((clientsList, index) => {
+                                    {console.log(clientsList.CompanyName)}
+                                    return <option value={clientsList.CompanyName}>{clientsList.CompanyName}</option>;
+                                  })}
                                 </select>
                               </div>
                             </div>
@@ -1001,7 +1059,9 @@ class MyTime extends Component {
                 <tr key={index}>
                   <td>
                     <span className="badge badge-dot mr-4">
-                      {timesheet.client[0].DisplayName}
+                      {/* {timesheet.client[0].DisplayName} */}
+                      {timesheet.CustomerRef.value}
+                      {/* {timesheet.Description} */}
                     </span>
                   </td>
                   <td>
