@@ -1,9 +1,9 @@
 // local
-export const BASE_URL = "http://localhost:9000/";
+//export const BASE_URL = "http://localhost:9000/";
 
 // dev
-// export const BASE_URL = "https://api.verd.com.au/";
-
+export const BASE_URL = "http://api.verd.com.au/";
+//export const BASE_URL = "/api";
 export const EXPENSE_TYPES = [
   "Advertising & Marketing",
   "Ask My Accountant",
