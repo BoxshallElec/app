@@ -99,7 +99,7 @@ class TimesheetsTable extends Component {
     var isChecked = event.target.checked;
     var timesheetData = this.props.timesheetData;
     var keys = Object.keys(timesheetData);
-    console.log(Object);
+    console.log(timesheetData);
     var timesheetIds = this.state.timesheetIds;
     if (!name.includes("cust") && name.includes("table")) {
       var index = name.split("_")[1];
@@ -443,6 +443,7 @@ class TimesheetsTable extends Component {
   }
   render() {
     console.log("props", this.props.selectedStatus);
+    console.log(this.props);
     return (
       <React.Fragment>
         {this.props.timesheetData ? (
