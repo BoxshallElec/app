@@ -227,8 +227,9 @@ class MyTime extends Component {
   //   console.log(this.state.isVariation);
   // }
   handleSubmit = (event) => {
+    
     event.preventDefault();
-
+    console.log("Handle submit::::");
     let images = [];
     let tokenData = parseJwt();
     let userId = tokenData.userid;
@@ -297,11 +298,154 @@ class MyTime extends Component {
       });
       console.log(this.state.isVariation);
     }
-   
-  };
+  //else if(event.target.value=="draft"){
+  //   console.log("drafts::");
+  //   let images = [];
+  //   let tokenData = parseJwt();
+  //   let userId = tokenData.userid;
+  //   if (Object.keys(this.state.images).length > 0) {
+  //     let selectedFiles = { ...this.state.images };
+  //     Object.values(selectedFiles).forEach((file) => {
+  //       images.push(
+  //         `timesheet/${userId}/${new Date().getTime()}-${file.name.replace(
+  //           /&/g,
+  //           ""
+  //         )}`
+  //       );
+  //     });
+  //     var self = this;
+  //     self.setState({ loading: true });
 
+  //     let uploadUrl = Constants.BASE_URL + "upload/generate-signed-urls";
+  //     axios
+  //       .post(uploadUrl, { imageNames: images, token: getToken() })
+  //       .then(function (response) {
+  //         if (response.data.success) {
+  //           let uploadedFiles = [...self.state.images];
+  //           response.data.data.forEach(async (directObj, index) => {
+  //             const formData = new FormData();
+  //             formData.append("key", directObj.params.key);
+  //             formData.append("acl", directObj.params.acl);
+  //             formData.append(
+  //               "x-amz-credential",
+  //               directObj.params["x-amz-credential"]
+  //             );
+  //             formData.append(
+  //               "x-amz-algorithm",
+  //               directObj.params["x-amz-algorithm"]
+  //             );
+  //             formData.append("x-amz-date", directObj.params["x-amz-date"]);
+  //             formData.append("policy", directObj.params["policy"]);
+  //             formData.append(
+  //               "x-amz-signature",
+  //               directObj.params["x-amz-signature"]
+  //             );
+  //             formData.append("file", uploadedFiles[index]);
+  //             await fetch(directObj.form_url, {
+  //               method: "POST",
+  //               body: formData,
+  //             });
+  //           });
+  //           self.addTimeSheet(images);
+  //           self.setState({
+  //             clientValue:"default",
+  //             serviceValue:"default",
+  //             isVariation: false,
+  //           });
+  //           console.log(self.isVariation);
+  //         }
+  //       })
+  //       .catch(function (error) {
+  //         self.setState({ loading: false });
+  //       });
+        
+  //   } else {
+  //     this.draftTimeSheet([]);
+  //     this.setState({
+  //       clientValue:"default",
+  //       serviceValue:"default",
+  //       isVariation: false,
+  //     });
+  //     console.log(this.state.isVariation);
+  //   }
+  // }
+  };
+  handleDraft = (event) => {
+    
+    event.preventDefault();
+    console.log("Handle draft::::");
+    let images = [];
+    let tokenData = parseJwt();
+    let userId = tokenData.userid;
+    if (Object.keys(this.state.images).length > 0) {
+      let selectedFiles = { ...this.state.images };
+      Object.values(selectedFiles).forEach((file) => {
+        images.push(
+          `timesheet/${userId}/${new Date().getTime()}-${file.name.replace(
+            /&/g,
+            ""
+          )}`
+        );
+      });
+      var self = this;
+      self.setState({ loading: true });
+
+      let uploadUrl = Constants.BASE_URL + "upload/generate-signed-urls";
+      axios
+        .post(uploadUrl, { imageNames: images, token: getToken() })
+        .then(function (response) {
+          if (response.data.success) {
+            let uploadedFiles = [...self.state.images];
+            response.data.data.forEach(async (directObj, index) => {
+              const formData = new FormData();
+              formData.append("key", directObj.params.key);
+              formData.append("acl", directObj.params.acl);
+              formData.append(
+                "x-amz-credential",
+                directObj.params["x-amz-credential"]
+              );
+              formData.append(
+                "x-amz-algorithm",
+                directObj.params["x-amz-algorithm"]
+              );
+              formData.append("x-amz-date", directObj.params["x-amz-date"]);
+              formData.append("policy", directObj.params["policy"]);
+              formData.append(
+                "x-amz-signature",
+                directObj.params["x-amz-signature"]
+              );
+              formData.append("file", uploadedFiles[index]);
+              await fetch(directObj.form_url, {
+                method: "POST",
+                body: formData,
+              });
+            });
+            self.addTimeSheet(images);
+            self.setState({
+              clientValue:"default",
+              serviceValue:"default",
+              isVariation: false,
+            });
+            console.log(self.isVariation);
+          }
+        })
+        .catch(function (error) {
+          self.setState({ loading: false });
+        });
+        
+    } else {
+      this.draftTimeSheet([]);
+      this.setState({
+        clientValue:"default",
+        serviceValue:"default",
+        isVariation: false,
+      });
+      console.log(this.state.isVariation);
+    }
+  };
   addTimeSheet = (images) => {
     var url = Constants.BASE_URL + "timesheet/add";
+    console.log(url);
     var self = this;
     self.setState({ loading: true });
     var payload = {
@@ -348,7 +492,54 @@ class MyTime extends Component {
       });
      
   };
+  draftTimeSheet = (images) => {
+    var url = Constants.BASE_URL + "timesheet/draft";
+    var self = this;
+    self.setState({ loading: true });
+    var payload = {
+      token: localStorage.getItem("token"),
+      StartTime: self.state.StartTime,
+      Hours: self.state.Hours,
+      clientId: self.state.clientId,
+      classId: self.state.classId,
+      taskId: self.state.taskId,
+      isBillable: self.state.isBillable,
+      Description: self.state.Description,
+      notes: self.state.notes,
+      images: images,
+      empId: self.state.empData["Id"],
+    };
+    $("#call-modal-form").removeClass("show");
+    $("#call-modal-form").css("display", "");
+    $(".modal-backdrop.fade.show").remove();
 
+    axios
+      .post(url, payload)
+      .then(function (response) {
+        if (response.data.success) {
+          let fileUpload = document.getElementById("file_upload");
+          if (fileUpload) {
+            fileUpload["value"] = "";
+          }
+          self.setState({
+            StartTime: new Date(),
+            Hours: "",
+            clientId: "",
+            classId: "",
+            taskId: "",
+            isBillable: false,
+            Description: "",
+            notes: "",
+            images: [],
+            timesheets: self.state.timesheets.concat([response.data.data]),
+          });
+        }
+      })
+      .catch(function (error) {
+        self.setState({ loading: false });
+      });
+     
+  };
   handlePageClick = (data) => {
     const from = data.selected * 10;
     var self = this;
@@ -1093,9 +1284,13 @@ class MyTime extends Component {
                           >
                             Close
                           </button>
-                          <button type="submit" className="btn btn-primary">
+                          <button type="button" className="btn btn-primary" value="draft" onClick={this.handleDraft}>
+                            Draft
+                          </button>
+                          <button type="submit" className="btn btn-primary" value="submit">
                             Create
                           </button>
+                          {/* handleDraft */}
                         </div>
                       </form>
                     </div>
@@ -1236,6 +1431,21 @@ class MyTime extends Component {
                           onClick={() => this.updateModal(index)}
                         >
                           Edit
+                        </button>
+                        <button
+                          className="dropdown-item"
+                          //className="btn btn-icon btn-3 btn-primary text-right"
+                          type="button"
+                          data-toggle="modal"
+                          // data-target="#call-modal-form-filled"
+                          disabled={
+                            timesheet.status == "Approved" ||
+                            timesheet.status == "Rejected" ||
+                            timesheet.status == "Archived"
+                          }
+                          // onClick={() => this.updateModal(index)}
+                        >
+                          Submit for Approval
                         </button>
                       </div>
                     </div>
