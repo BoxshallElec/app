@@ -276,14 +276,28 @@ class MyTime extends Component {
               });
             });
             self.addTimeSheet(images);
+            self.setState({
+              clientValue:"default",
+              serviceValue:"default",
+              isVariation: false,
+            });
+            console.log(self.isVariation);
           }
         })
         .catch(function (error) {
           self.setState({ loading: false });
         });
+        
     } else {
       this.addTimeSheet([]);
+      this.setState({
+        clientValue:"default",
+        serviceValue:"default",
+        isVariation: false,
+      });
+      console.log(this.state.isVariation);
     }
+   
   };
 
   addTimeSheet = (images) => {
@@ -999,6 +1013,7 @@ class MyTime extends Component {
                                   required={this.state.isBillable}
                                 />
                               </div>
+                              
                               ):(<div>{console.log(this.state.isVariation)}</div>)}
                             
                             </div>

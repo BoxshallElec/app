@@ -14,3 +14,6 @@ div.input-group.input-group-alternative {
 .rounded-circle {
   height: 36px !important;
 }
+body{
+  overflow-y: scroll ;
+}
