@@ -919,7 +919,33 @@ class MyTime extends Component {
         self.setState({ loading: false });
       });
   };
-
+  sendApproval = (timesheet,index) =>{
+    console.log(timesheet);
+    var self = this;
+    var url = Constants.BASE_URL + "timesheet/updatestatus";
+    var payload = {
+      token: localStorage.getItem("token"),
+      id: timesheet._id,
+    };
+    $("#call-modal-form-filled").removeClass("show");
+    $("#call-modal-form-filled").css("display", "");
+    $(".modal-backdrop.fade.show").remove();
+    axios
+      .post(url, payload)
+      .then(function (response) {
+        console.log(response);
+        if (response.data.success) {
+          self.setState({ loading: false });
+          window.location.reload(false);
+          ToastsStore.success(response.data.message);
+          console.log("LOL");
+          console.log(response.data.success);
+        }
+      })
+      .catch(function (error) {
+        self.setState({ loading: false });
+      });
+  };
   render() {
     
     return this.state.isLoading ? (
@@ -1443,6 +1469,7 @@ class MyTime extends Component {
                             timesheet.status == "Rejected" ||
                             timesheet.status == "Archived"
                           }
+                          onClick={() => this.sendApproval(timesheet,index)}
                           // onClick={() => this.updateModal(index)}
                         >
                           Submit for Approval
