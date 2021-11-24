@@ -25,9 +25,19 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>Verd</title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+  <link rel="stylesheet" href="node_modules/mdbootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="node_modules/mdbootstrap/css/mdb.min.css">
+  <link rel="stylesheet" href="node_modules/mdbootstrap/css/style.css">
 </head>
 
 <body>
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/jquery.min.js"></script>
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/popper.min.js"></script>
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="node_modules/mdbootstrap/js/mdb.min.js"></script>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
   <!--
@@ -51,6 +61,26 @@
   </script>
   <script defer src="https://www.gstatic.com/firebasejs/6.3.5/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/6.3.5/firebase-auth.js"></script>
+  <script>
+    $(document).ready(function () {
+      $('#clientTable').DataTable();
+      $('.dataTables_length').addClass('bs-select');
+      });
+  </script>
+  <style>
+    table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting:before,
+    table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_asc:before,
+    table.dataTable thead .sorting_asc_disabled:after,
+    table.dataTable thead .sorting_asc_disabled:before,
+    table.dataTable thead .sorting_desc:after,
+    table.dataTable thead .sorting_desc:before,
+    table.dataTable thead .sorting_desc_disabled:after,
+    table.dataTable thead .sorting_desc_disabled:before {
+    bottom: .5em;
+    }
+  </style>
 </body>
 
 </html>
