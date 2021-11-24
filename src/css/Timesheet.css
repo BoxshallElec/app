@@ -1,0 +1,37 @@
+.clientTable{
+    border: 5px;
+    background-color: #5e72e4;
+    color: azure;
+}
+.btn{
+    /* float:right; */
+    color: azure;
+    
+    /* border-color: azure; */
+}
+.fas{
+    color: azure;
+}
+.myDiv{
+    border: 5px;
+    background-color: azure;
+    color: #5e72e4;
+}
+table, th, td {
+    border: 1px solid azure;
+    border-collapse: collapse;
+    width: 100%;
+  } 
+h2 {
+    width: 100%; 
+    border-bottom: 1px solid #dae5ef; 
+    line-height: 0.1em;
+    margin: 10px 0 20px; 
+ }
+label{
+    width: 100%;
+} 
+.tdDisplay{
+    background-color: azure;
+    color:#5e72e4;
+}
