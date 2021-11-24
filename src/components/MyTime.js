@@ -20,6 +20,8 @@ import PropTypes from "prop-types";
 import { css, StyleSheet } from "aphrodite/no-important";
 import CameraInput from "../shared/inputs/Camera";
 import fscreen from "fscreen";
+import { MDBDataTable, MDBInput } from "mdbreact";
+import { MDBTable, MDBTableBody, MDBTableHead } from 'mdbreact';
 
 const $ = window.$;
 
@@ -36,7 +38,111 @@ class MyTime extends Component {
       tasks: [],
       classes: [],
       clients: [],
-      timesheets: [],
+      timesheets:[],
+      timesheetss: {columns: [
+        {
+          'label': 'Check',
+          'field': 'check',
+          'sort': 'asc'
+        },
+        // {
+        //   label: 'BillableStatus',
+        //   field: 'BillableStatus',
+        //   sort: 'asc',
+        //   width: 150
+        // },
+        {
+          label: 'Client',
+          field: 'CustomerRef',
+          sort: 'asc',
+          width: 270
+        },
+        {
+          label: 'Hours',
+          field: 'Hours',
+          sort: 'asc',
+          width: 100
+        },
+        {
+          label: 'Description',
+          field: 'Description',
+          sort: 'asc',
+          width: 200
+        },
+        // {
+        //   label: 'EmployeeRef',
+        //   field: 'EmployeeRef',
+        //   sort: 'asc',
+        //   width: 100
+        // },
+        
+        {
+          label: 'ItemRef',
+          field: 'ItemRef',
+          sort: 'asc',
+          width: 100
+        },
+        // {
+        //   label: 'Class',
+        //   field: 'class',
+        //   sort: 'asc',
+        //   width: 100
+        // },
+        {
+          label: 'Images',
+          field: 'images',
+          sort: 'asc',
+          width: 100
+        },
+        // {
+        //   label: 'Notes',
+        //   field: 'notes',
+        //   sort: 'asc',
+        //   width: 100
+        // },
+        {
+          label: 'Status',
+          field: 'status',
+          sort: 'asc',
+          width: 100
+        },
+        {
+          'label': '',
+          'field': 'button',
+          'sort': 'asc'
+        },
+        // {
+        //   label: 'Task',
+        //   field: 'task',
+        //   sort: 'asc',
+        //   width: 100
+        // },
+        // {
+        //   label: '_v',
+        //   field: '_v',
+        //   sort: 'asc',
+        //   width: 100
+        // },
+        // {
+        //   label: '_id',
+        //   field: '_id',
+        //   sort: 'asc',
+        //   width: 100
+        // }
+        // {
+        //   label: 'Start date',
+        //   field: 'date',
+        //   sort: 'asc',
+        //   width: 150
+        // },
+        // {
+        //   label: 'Salary',
+        //   field: 'salary',
+        //   sort: 'asc',
+        //   width: 100
+        // }
+      ],
+      rows: []},
       totalCount: 0,
       isLoading: true,
       displayImages: [],
@@ -60,7 +166,9 @@ class MyTime extends Component {
     this.getMyTimeSheets();
     this.getClients();
     this.getService();
+    
   }
+  
   getService = () => {
     var url = Constants.BASE_URL + "task/list";
     var self = this;
@@ -109,6 +217,32 @@ class MyTime extends Component {
         console.log(error);
       });
   };
+  sendApproval = (timesheet,index) =>{
+    console.log(timesheet);
+    var self = this;
+    var url = Constants.BASE_URL + "timesheet/updatestatus";
+    var payload = {
+      token: localStorage.getItem("token"),
+      id: timesheet._id,
+    };
+    $("#call-modal-form-filled").removeClass("show");
+    $("#call-modal-form-filled").css("display", "");
+    $(".modal-backdrop.fade.show").remove();
+    axios
+      .post(url, payload)
+      .then(function (response) {
+        console.log(response);
+        if (response.data.success) {
+          self.setState({ loading: false });
+          window.location.reload(false);
+          ToastsStore.success(response.data.message);
+          console.log(response.data.success);
+        }
+      })
+      .catch(function (error) {
+        self.setState({ loading: false });
+      });
+  };
   getMyTimeSheets = () => {
     Moment.locale("en");
 
@@ -117,18 +251,59 @@ class MyTime extends Component {
     var payload = {
       token: localStorage.getItem("token"),
     };
-
     var url = Constants.BASE_URL + "timesheet/listWithCount";
-
+    console.log(self.state.timesheetss.rows);
     axios
       .post(url, payload)
       .then(function (response) {
         if (response.data.success) {
+          let timesheetssCopy = JSON.parse(JSON.stringify(self.state.timesheetss));
+          timesheetssCopy.rows = response.data.data;
+          // timesheetssCopy.rows.check = null;
           self.setState({
             timesheets: response.data.data,
+            // timesheetss:timesheetssCopy,
+            // timesheetss.rows: response.data.data,
             isLoading: false,
             totalCount: Math.ceil(response.data.totalCount / 10),
           });
+          
+          for (let i =0; i<timesheetssCopy.rows.length;i++){
+              let id = "checkbox"+i;
+              timesheetssCopy.rows[i].check = <input type="checkbox" id="checkid" name="check" value="check"/>
+              timesheetssCopy.rows[i].CustomerRef = timesheetssCopy.rows[i].CustomerRef.value;
+              timesheetssCopy.rows[i].EmployeeRef = timesheetssCopy.rows[i].EmployeeRef.value;
+              timesheetssCopy.rows[i].ItemRef = timesheetssCopy.rows[i].ItemRef.value;
+              // {this.state.timesheets.map((timesheet, index) => (
+              // console.log(self.state.timesheets[i]);
+              timesheetssCopy.rows[i].button = <button
+              className="dropdown-item"
+              //className="btn btn-icon btn-3 btn-primary text-right"
+              type="button"
+              data-toggle="modal"
+              // data-target="#call-modal-form-filled"
+              disabled={
+                self.state.timesheets[i].status == "Approved" ||
+                self.state.timesheets[i].status == "Rejected" ||
+                self.state.timesheets[i].status == "Archived"
+              }
+              onClick={() => this.sendApproval(self.state.timesheets[i],i)}
+              // onClick={() => this.updateModal(index)}
+            >
+              Submit for Approval
+            </button>
+          }
+          self.setState({
+            
+            timesheetss:timesheetssCopy,
+            // timesheetss.rows: response.data.data,
+            isLoading: false,
+            totalCount: Math.ceil(response.data.totalCount / 10),
+          });
+          // = timesheetssCopy.rows.CustomerRef;
+          
+          console.log(self.state.timesheetss);
+          
         }
       })
       .catch(function (error) {
@@ -919,33 +1094,7 @@ class MyTime extends Component {
         self.setState({ loading: false });
       });
   };
-  sendApproval = (timesheet,index) =>{
-    console.log(timesheet);
-    var self = this;
-    var url = Constants.BASE_URL + "timesheet/updatestatus";
-    var payload = {
-      token: localStorage.getItem("token"),
-      id: timesheet._id,
-    };
-    $("#call-modal-form-filled").removeClass("show");
-    $("#call-modal-form-filled").css("display", "");
-    $(".modal-backdrop.fade.show").remove();
-    axios
-      .post(url, payload)
-      .then(function (response) {
-        console.log(response);
-        if (response.data.success) {
-          self.setState({ loading: false });
-          window.location.reload(false);
-          ToastsStore.success(response.data.message);
-          console.log("LOL");
-          console.log(response.data.success);
-        }
-      })
-      .catch(function (error) {
-        self.setState({ loading: false });
-      });
-  };
+  
   render() {
     
     return this.state.isLoading ? (
@@ -976,6 +1125,8 @@ class MyTime extends Component {
           onClose={this.closeImgsViewer}
           showThumbnails={true}
         />
+        {console.log(this.state.timesheetss)}
+       
         <div className="text-right">
           <button
             className="btn btn-icon btn-3 btn-primary text-right"
@@ -1326,558 +1477,16 @@ class MyTime extends Component {
             </div>
           </div>
         </div>
-        <div className="table-responsive">
-          <table className="table align-items-center table-flush mt-2">
-            <thead className="thead-light">
-              <tr>
-                <th scope="col">Client</th>
-                <th scope="col">Hours</th>
-                <th scope="col">Date</th>
-                <th scope="col">Images</th>
-                <th scope="col">Description</th>
-                <th scope="col">Status</th>
-                <th scope="col" />
-              </tr>
-            </thead>
-            <tbody>
-              {console.log(this.state.timesheets)}
-              {this.state.timesheets.map((timesheet, index) => (
-                <tr key={index}>
-                  <td>
-                    <span className="badge badge-dot mr-4">
-                      {/* {timesheet.client[0].DisplayName} */}
-                      {timesheet.CustomerRef.value}
-                      {/* {timesheet.Description} */}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge badge-dot mr-4">
-                      {timesheet.Hours}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <span>{Moment(timesheet.StartTime).format("LL")}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div
-                      class="avatar-group"
-                      onClick={(event) =>
-                        this.displayImages(timesheet.images, event)
-                      }
-                    >
-                      {timesheet.images.length > 0
-                        ? timesheet.images.map((image, imageIndex) => (
-                            <a
-                              href="/"
-                              class="avatar avatar-sm"
-                              key={imageIndex}
-                              data-toggle="tooltip"
-                              data-original-title="Ryan Tompson"
-                            >
-                              <img
-                                alt=""
-                                src={
-                                  image.startsWith("http")
-                                    ? image
-                                    : `${Constants.AWS_URL}${image}`
-                                }
-                                class="rounded-circle"
-                              />
-                            </a>
-                          ))
-                        : "N/A"}
-                    </div>
-                  </td>
-                  <td>
-                    <div
-                      className="d-flex align-items-center"
-                      data-toggle="popover"
-                      data-color="default"
-                      data-placement="top"
-                      data-content={timesheet.Description}
-                    >
-                      <span
-                        className="d-inline-block text-truncate"
-                        style={{ maxWidth: "150px" }}
-                      >
-                        {timesheet.Description}
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <div
-                      className="d-flex align-items-center"
-                      data-toggle="popover"
-                      data-color="default"
-                      data-placement="top"
-                      data-content={timesheet.Description}
-                    >
-                      <span
-                        className="d-inline-block text-truncate"
-                        style={{ maxWidth: "150px" }}
-                      >
-                        {timesheet.status}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="text-right">
-                    <div className="dropdown">
-                      <a
-                        className="btn btn-sm btn-icon-only text-light"
-                        href="/"
-                        role="button"
-                        data-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        <Icon
-                          path={mdiDotsVertical}
-                          title="Dashboard"
-                          size={1}
-                          horizontal
-                          vertical
-                          rotate={180}
-                          color="#000000"
-                        />
-                      </a>
-                      <div className="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                        <button
-                          className="dropdown-item"
-                          //className="btn btn-icon btn-3 btn-primary text-right"
-                          type="button"
-                          data-toggle="modal"
-                          data-target="#call-modal-form-filled"
-                          disabled={
-                            timesheet.status == "Approved" ||
-                            timesheet.status == "Rejected" ||
-                            timesheet.status == "Archived"
-                          }
-                          onClick={() => this.updateModal(index)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="dropdown-item"
-                          //className="btn btn-icon btn-3 btn-primary text-right"
-                          type="button"
-                          data-toggle="modal"
-                          // data-target="#call-modal-form-filled"
-                          disabled={
-                            timesheet.status == "Approved" ||
-                            timesheet.status == "Rejected" ||
-                            timesheet.status == "Archived"
-                          }
-                          onClick={() => this.sendApproval(timesheet,index)}
-                          // onClick={() => this.updateModal(index)}
-                        >
-                          Submit for Approval
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <ReactPaginate
-            previousLabel={"<"}
-            nextLabel={">"}
-            breakLabel={"..."}
-            breakClassName={"break-me"}
-            pageCount={this.state.totalCount}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
-            onPageChange={this.handlePageClick}
-            pageClassName={"page-item"}
-            pageLinkClassName={"page-link"}
-            nextClassName={"page-item"}
-            nextLinkClassName={"page-link"}
-            previousClassName={"page-item"}
-            previousLinkClassName={"page-link"}
-            containerClassName={"pagination justify-content-center"}
-            subContainerClassName={"pages pagination"}
-            activeClassName={"active"}
-          />
-
-          <div
-            className="modal fade"
-            id="call-modal-form-filled"
-            tabIndex="-1"
-            role="dialog"
-            aria-labelledby="modal-form"
-            aria-hidden="true"
-          >
-            <div
-              className="modal-dialog modal- modal-dialog-centered modal-lg"
-              role="document"
-            >
-              <div className="modal-content">
-                <div className="modal-body p-0">
-                  <div className="card bg-secondary shadow">
-                    <div className="card-header bg-white border-0">
-                      <div className="row align-items-center">
-                        <div className="col-6">
-                          <h3 className="mb-0">My Time</h3>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="card-body text-left">
-                      <form onSubmit={this.handleUpdate}>
-                        <div className="pl-lg-4">
-                          <div className="row">
-                            <div className="col-lg-6">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="input-country"
-                                >
-                                  Activity Date
-                                </label>
-                                <div className="input-group input-group-alternative">
-                                  <div className="input-group-prepend">
-                                    <span className="input-group-text">
-                                      <Icon
-                                        path={mdiCalendar}
-                                        title="calendar"
-                                        size={0.9}
-                                        horizontal
-                                        vertical
-                                        rotate={180}
-                                        color="#5e72e4"
-                                        className="mr-2"
-                                      />
-                                    </span>
-                                  </div>
-                                  {/* <span>
-                                      {Moment(timesheet.StartTime).format("LL")}
-                                    </span> */}
-                                  <DatePicker
-                                    className="form-control datepicker"
-                                    // value={Moment(timesheet.StartTime).format(
-                                    //   "LL"
-                                    // )}
-                                    value={Moment(this.state.time).format("LL")}
-                                    selected={this.state.time}
-                                    onChange={this.handleTimeChange}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-lg-6">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="input-first-name"
-                                >
-                                  Hours
-                                </label>
-                                <input
-                                  type="number"
-                                  id="input-hours"
-                                  className="form-control form-control-alternative"
-                                  placeholder="Hours"
-                                  name="hours"
-                                  value={this.state.hours}
-                                  onChange={this.handleChange}
-                                  required
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="row">
-                            <div className="col-lg-6">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="client"
-                                >
-                                  Client
-                                </label>
-                                <select
-                                  className="form-control input-group input-group-alternative"
-                                  name="client"
-                                  id="client"
-                                  //value={timesheet.client[0].DisplayName}
-                                  value={
-                                    this.state.client
-                                      ? this.state.client["_id"]
-                                      : ""
-                                  }
-                                  onChange={this.handleChange}
-                                >
-                                  <option value=""></option>
-                                  {this.state.clients.map((client, index) => (
-                                    <React.Fragment>
-                                      <option
-                                        value={client._id}
-                                        key={`client${index}`}
-                                      >
-                                        {client.FullyQualifiedName}
-                                      </option>
-                                    </React.Fragment>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                            {/* <div className="col-lg-6">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="taskId"
-                                >
-                                  Activity
-                                </label>
-                                <select
-                                  className="form-control input-group input-group-alternative"
-                                  name="taskId"
-                                  id="taskId"
-                                  value={this.state.taskId}
-                                  onChange={this.handleChange}
-                                >
-                                  <option value=""></option>
-                                  {this.state.tasks.map((task, index) => (
-                                    <React.Fragment>
-                                      <option
-                                        value={task._id}
-                                        key={`task${index}`}
-                                      >
-                                        {task.FullyQualifiedName}
-                                      </option>
-                                    </React.Fragment>
-                                  ))}
-                                </select>
-                              </div>
-                            </div> */}
-                          </div>
-
-                          <div className="row">
-                            <div className="col-lg-6">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="class"
-                                >
-                                  Service
-                                </label>
-                                <select
-                                  className="form-control input-group input-group-alternative"
-                                  name="class"
-                                  id="class"
-                                  value={this.state.taskId}
-                                  onChange={this.handleChange}
-                                >
-                                  <option value=""></option>
-                                  {this.state.taskDropdown.map(
-                                    (task, index) => (
-                                      <React.Fragment>
-                                        <option
-                                          value={task._id}
-                                          key={`class${index}`}
-                                        >
-                                          {task.FullyQualifiedName}
-                                        </option>
-                                      </React.Fragment>
-                                    )
-                                  )}
-                                </select>
-                              </div>
-                            </div>
-                            <div className="col-lg-6">
-                              <div className="form-group mt-4">
-                                <div className="custom-control custom-control-alternative custom-checkbox">
-                                  <input
-                                    className="custom-control-input"
-                                    id=" customCheckLogin"
-                                    type="checkbox"
-                                    checked={this.state.billable}
-                                    onChange={this.toggleUpdateChange}
-                                  />
-                                  <label
-                                    className="custom-control-label"
-                                    htmlFor=" customCheckLogin"
-                                  >
-                                    <span>Variation?</span>
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="col-lg-6">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="input-last-name"
-                                >
-                                  Description
-                                </label>
-                                <textarea
-                                  rows="4"
-                                  cols="50"
-                                  type="text"
-                                  id="input-last-name"
-                                  className="form-control form-control-alternative"
-                                  placeholder="Description"
-                                  name="description"
-                                  value={this.state.description}
-                                  onChange={this.handleChange}
-                                  required
-                                />
-                              </div>
-                            </div>
-                            <div className="col-lg-6">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  htmlFor="input-last-name"
-                                >
-                                  Variation Notes
-                                </label>
-                                <textarea
-                                  rows="4"
-                                  cols="50"
-                                  id="input-last-name"
-                                  className="form-control form-control-alternative"
-                                  placeholder="Notes"
-                                  name="notes"
-                                  value={this.state.notes}
-                                  onChange={this.handleChange}
-                                  required={this.state.isBillable}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-lg-12">
-                              <div className="form-group">
-                                <label
-                                  className="form-control-label"
-                                  for="file_upload"
-                                >
-                                  Attachements
-                                </label>
-
-                                <input
-                                  type="file"
-                                  multiple
-                                  id="file_upload"
-                                  className="form-control form-control-alternative"
-                                  placeholder="Images"
-                                  name="image"
-                                  onChange={this.handleFileUpdateChange}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-lg-12">
-                              <div className="form-group">
-                                <label
-                                  className="btn btn-secondary"
-                                  for="camera"
-                                >
-                                  Take a photo
-                                </label>
-
-                                <input
-                                  type="file"
-                                  multiple
-                                  accept="image/*"
-                                  capture="camera"
-                                  className="form-control form-control-alternative"
-                                  id="camera"
-                                  name="camera"
-                                  style={{ display: "none" }}
-                                  onChange={this.handleFileUpdateChange}
-                                ></input>
-                                <br />
-
-                                {this.state.imgUrls != undefined &&
-                                this.state.imgUrls.length ? (
-                                  Array.from(this.state.imgUrls).map(
-                                    (imgUrl) => (
-                                      <div>
-                                        <span>{imgUrl.split("/")[2]}</span>
-                                        <button
-                                          type="button"
-                                          className="btn btn-icon"
-                                          name={imgUrl}
-                                          onClick={(event) =>
-                                            this.removeImageUrl(event, imgUrl)
-                                          }
-                                        >
-                                          <Icon
-                                            path={mdiDelete}
-                                            title="delete"
-                                            size={0.9}
-                                            horizontal
-                                            vertical
-                                            rotate={180}
-                                            color="#5e72e4"
-                                            className="mr-2"
-                                          />
-                                        </button>
-                                      </div>
-                                    )
-                                  )
-                                ) : (
-                                  <p>No Old Attachments Uploaded</p>
-                                )}
-
-                                {this.state.image && this.state.image.length
-                                  ? Array.from(this.state.image).map((img) => (
-                                      <div>
-                                        <span>{img.name}</span>
-                                        <button
-                                          type="button"
-                                          className="btn btn-icon"
-                                          name={img.name}
-                                          onClick={(event) =>
-                                            this.removeFileUpdate(
-                                              event,
-                                              img.name
-                                            )
-                                          }
-                                        >
-                                          <Icon
-                                            path={mdiDelete}
-                                            title="delete"
-                                            size={0.9}
-                                            horizontal
-                                            vertical
-                                            rotate={180}
-                                            color="#5e72e4"
-                                            className="mr-2"
-                                          />
-                                        </button>
-                                      </div>
-                                    ))
-                                  : ""}
-                              </div>
-                            </div>
-                            <div className="modal-footer">
-                              <button
-                                type="button"
-                                className="btn btn-link"
-                                data-dismiss="modal"
-                              >
-                                Close
-                              </button>
-                              <button type="submit" className="btn btn-primary">
-                                Update
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MDBDataTable
+          striped
+          bordered
+          small btn fixed
+          data={this.state.timesheetss}
+        />
+        {/* <MDBTable scrollY>
+          <MDBTableHead columns={this.state.timesheetss.columns} />
+          <MDBTableBody rows={this.state.timesheetss.rows} />
+        </MDBTable> */}
       </React.Fragment>
     );
   }
