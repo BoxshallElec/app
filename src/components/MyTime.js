@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { mdiPlus, mdiDotsVertical, mdiCalendar, mdiDelete } from "@mdi/js";
 import axios from "axios";
 import "../css/Employees.css";
+import "../css/Timesheet.css";
 import * as Constants from "./Constant";
 import Moment from "moment";
 import {
@@ -22,9 +23,18 @@ import CameraInput from "../shared/inputs/Camera";
 import fscreen from "fscreen";
 import { MDBDataTable, MDBInput } from "mdbreact";
 import { MDBTable, MDBTableBody, MDBTableHead } from 'mdbreact';
+import { MDBDataTableV5 } from 'mdbreact';
+import Select from 'react-select'
 
 const $ = window.$;
-
+const options = [
+  { value: 'Hours', label: 'Hours' },
+  { value: 'BillableStatus', label: 'BillableStatus' },
+  { value: 'CustomerRef', label: 'CustomerRef' },
+  { value: 'Description', label: 'Description' },
+  { value: 'images', label: 'images' },
+  { value: 'status', label: 'status' }
+  ]
 class MyTime extends Component {
   constructor(props) {
     super(props);
@@ -35,22 +45,34 @@ class MyTime extends Component {
       isBillable: false,
       Description: "",
       notes: "",
+      dm:"",
       tasks: [],
       classes: [],
       clients: [],
       timesheets:[],
+     selectedTimesheet: {columns: [
+        {
+          'label': 'Check',
+          'field': 'check',
+          'sort': 'asc'
+        },
+        // Add data column to the timesheet
+        // Refresh time for the QBO sandbox (Check: time from app to db to sandbox)
+      ],
+      rows: []},
+
       timesheetss: {columns: [
         {
           'label': 'Check',
           'field': 'check',
           'sort': 'asc'
         },
-        // {
-        //   label: 'BillableStatus',
-        //   field: 'BillableStatus',
-        //   sort: 'asc',
-        //   width: 150
-        // },
+        {
+          label: 'BillableStatus',
+          field: 'BillableStatus',
+          sort: 'asc',
+          width: 150
+        },
         {
           label: 'Client',
           field: 'CustomerRef',
@@ -106,11 +128,11 @@ class MyTime extends Component {
           sort: 'asc',
           width: 100
         },
-        {
-          'label': '',
-          'field': 'button',
-          'sort': 'asc'
-        },
+        // {
+        //   'label': '',
+        //   'field': 'button',
+        //   'sort': 'asc'
+        // },
         // {
         //   label: 'Task',
         //   field: 'task',
@@ -141,6 +163,8 @@ class MyTime extends Component {
         //   sort: 'asc',
         //   width: 100
         // }
+        // Add data column to the timesheet
+        // Refresh time for the QBO sandbox (Check: time from app to db to sandbox)
       ],
       rows: []},
       totalCount: 0,
@@ -161,11 +185,12 @@ class MyTime extends Component {
       isVariation: false,
     };
   }
-
+  
   componentDidMount() {
     this.getMyTimeSheets();
     this.getClients();
     this.getService();
+    // this.sendApproval(this.state.timesheets,0);
     
   }
   
@@ -218,30 +243,36 @@ class MyTime extends Component {
       });
   };
   sendApproval = (timesheet,index) =>{
-    console.log(timesheet);
-    var self = this;
-    var url = Constants.BASE_URL + "timesheet/updatestatus";
-    var payload = {
-      token: localStorage.getItem("token"),
-      id: timesheet._id,
-    };
-    $("#call-modal-form-filled").removeClass("show");
-    $("#call-modal-form-filled").css("display", "");
-    $(".modal-backdrop.fade.show").remove();
-    axios
-      .post(url, payload)
-      .then(function (response) {
-        console.log(response);
-        if (response.data.success) {
+    if(timesheet.length==0){
+      alert("Select atleast one timesheet to send to approver");
+    }
+    else{
+      console.log(typeof(timesheet));
+      var self = this;
+      var url = Constants.BASE_URL + "timesheet/updatestatus";
+      var payload = {
+        token: localStorage.getItem("token"),
+        id: timesheet._id,
+      };
+      $("#call-modal-form-filled").removeClass("show");
+      $("#call-modal-form-filled").css("display", "");
+      $(".modal-backdrop.fade.show").remove();
+      axios
+        .post(url, payload)
+        .then(function (response) {
+          console.log(response);
+          if (response.data.success) {
+            self.setState({ loading: false });
+            window.location.reload(false);
+            ToastsStore.success(response.data.message);
+            console.log(response.data.success);
+          }
+        })
+        .catch(function (error) {
           self.setState({ loading: false });
-          window.location.reload(false);
-          ToastsStore.success(response.data.message);
-          console.log(response.data.success);
-        }
-      })
-      .catch(function (error) {
-        self.setState({ loading: false });
-      });
+        });
+    }
+    
   };
   getMyTimeSheets = () => {
     Moment.locale("en");
@@ -276,22 +307,23 @@ class MyTime extends Component {
               timesheetssCopy.rows[i].ItemRef = timesheetssCopy.rows[i].ItemRef.value;
               // {this.state.timesheets.map((timesheet, index) => (
               // console.log(self.state.timesheets[i]);
-              timesheetssCopy.rows[i].button = <button
-              className="dropdown-item"
-              //className="btn btn-icon btn-3 btn-primary text-right"
-              type="button"
-              data-toggle="modal"
-              // data-target="#call-modal-form-filled"
-              disabled={
-                self.state.timesheets[i].status == "Approved" ||
-                self.state.timesheets[i].status == "Rejected" ||
-                self.state.timesheets[i].status == "Archived"
-              }
-              onClick={() => this.sendApproval(self.state.timesheets[i],i)}
-              // onClick={() => this.updateModal(index)}
-            >
-              Submit for Approval
-            </button>
+            //   timesheetssCopy.rows[i].button = <button
+            //   className="dropdown-item"
+            //   //className="btn btn-icon btn-3 btn-primary text-right"
+            //   type="button"
+            //   data-toggle="modal"
+            //   // data-target="#call-modal-form-filled"
+            //   disabled={
+            //     self.state.timesheets[i].status == "Approved" ||
+            //     self.state.timesheets[i].status == "Rejected" ||
+            //     self.state.timesheets[i].status == "Archived"
+            //   }
+              
+            //   onClick={() => this.sendApproval(self.state.timesheets[i],i)}
+            //   // onClick={() => this.updateModal(index)}
+            // >
+            //   Submit for Approval
+            // </button>
           }
           self.setState({
             
@@ -401,6 +433,24 @@ class MyTime extends Component {
   //   this.setState({ isVariation: !this.state.isVariation });
   //   console.log(this.state.isVariation);
   // }
+  chooseColumn = (event) =>{
+    console.log(event);
+    var self = this;
+    var tc = self.state.timesheetss;
+    for(let i =1;i<self.state.timesheetss.columns.length;i++)
+      delete tc.columns[i];
+    console.log(tc);
+    for(let i =0;i<event.length;i++){
+      
+      tc.columns[1+i] = {label:event[i].value,field:event[i].value,sort:'asc',width:100};
+    }
+    console.log(tc);
+
+    self.setState({
+      timesheetss:tc,
+    });
+    console.log(self.state.timesheetsss);
+  };
   handleSubmit = (event) => {
     
     event.preventDefault();
@@ -618,6 +668,8 @@ class MyTime extends Component {
       console.log(this.state.isVariation);
     }
   };
+  // Activity Date: 
+  // Description: date, the task, variation, name of employee
   addTimeSheet = (images) => {
     var url = Constants.BASE_URL + "timesheet/add";
     console.log(url);
@@ -1128,26 +1180,55 @@ class MyTime extends Component {
         {console.log(this.state.timesheetss)}
        
         <div className="text-right">
-          <button
-            className="btn btn-icon btn-3 btn-primary text-right"
-            type="button"
-            data-toggle="modal"
-            data-target="#call-modal-form"
-          >
-            <span className="btn-inner--icon">
-              <Icon
-                path={mdiPlus}
-                title="Dashboard"
-                size={1}
-                horizontal
-                vertical
-                rotate={180}
-                color="#ffffff"
-              />
-            </span>
-
-            <span className="btn-inner--text">Add</span>
-          </button>
+          <table>
+            <tr>
+              <td>
+                {/* <form onSubmit={this.chooseColumn}>
+                  <select
+                                      multiple
+                                      className="form-control input-group input-group-alternative"
+                                      // className="chosen-select"
+                                      id="tableList"
+                                      
+                                      // value={this.state.clientValue}
+                                      // onChange={this.handleClientChange}
+                                    >
+                                      <option value="default">Choose Columns</option>
+                                      <option>Hours</option>
+                                      <option>BillableStatus</option>
+                                      <option>CustomerRef</option>
+                                      <option>Description</option>
+                                      <option>images</option>
+                                      <option>status</option>
+                    </select>
+                  <input type="submit"></input>
+                </form> */}
+                {/* <form onSubmit={this.chooseColumn}> */}
+                  <Select options={options} isMulti id="tableList" onChange={this.chooseColumn}/>
+                  {/* <input type="submit"></input>
+                </form> */}
+              </td>
+              <td>
+              <button className="btn btn-icon btn-3 btn-primary text-right"
+                type="button"
+                data-toggle="modal"
+                data-target="#call-modal-form">
+                  <span className="btn-inner--icon">
+                    <Icon
+                      path={mdiPlus}
+                      title="Dashboard"
+                      size={1}
+                      horizontal
+                      vertical
+                      rotate={180}
+                      color="#ffffff"
+                    />
+                  </span>
+                  <span className="btn-inner--text">ADD</span>
+              </button>
+              </td>
+            </tr>
+          </table>
           <div
             className="modal fade"
             id="call-modal-form"
@@ -1477,12 +1558,32 @@ class MyTime extends Component {
             </div>
           </div>
         </div>
-        <MDBDataTable
+        
+        {/* <MDBDataTable
           striped
           bordered
           small btn fixed
           data={this.state.timesheetss}
-        />
+        /> */}
+        {/* Edit option based on status */}
+        <MDBDataTableV5 autoWidth hover responsive checkboxFirstColumn={false} bordered entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} bodyCheckboxID="id1" data={this.state.timesheetss} />
+        <button
+              // className="dropdown-item"
+              className="btn btn-icon btn-3 btn-primary text-right"
+              type="button"
+              data-toggle="modal"
+              // data-target="#call-modal-form-filled"
+              // disabled={
+              //   this.state.timesheets[i].status == "Approved" ||
+              //   this.state.timesheets[i].status == "Rejected" ||
+              //   this.state.timesheets[i].status == "Archived"
+              // }
+              
+              onClick={() => this.sendApproval(this.state.selectedTimesheet,0)}
+              // onClick={() => this.updateModal(index)}
+            >
+              Submit for Approval
+            </button>
         {/* <MDBTable scrollY>
           <MDBTableHead columns={this.state.timesheetss.columns} />
           <MDBTableBody rows={this.state.timesheetss.rows} />
