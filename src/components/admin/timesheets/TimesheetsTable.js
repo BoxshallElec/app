@@ -41,6 +41,7 @@ class TimesheetsTable extends Component {
       }
       return null;
     }
+    // Make getEmployees instead of clients
     getClients = () => {
         var self = this;
         var payload = {
