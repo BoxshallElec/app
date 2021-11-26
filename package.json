@@ -29,9 +29,11 @@
     "react-paginate": "^6.3.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.2.0",
+    "react-select": "^5.2.1",
     "react-spinners": "^0.5.8",
     "react-switch": "^5.0.1",
-    "react-toasts": "^3.0.6"
+    "react-toasts": "^3.0.6",
+    "virtual-select-plugin": "^1.0.19"
   },
   "scripts": {
     "start": "react-scripts start",
