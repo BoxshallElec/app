@@ -27,6 +27,8 @@ import { MDBDataTableV5 } from 'mdbreact';
 import Select from 'react-select'
 
 const $ = window.$;
+var index_val = 0;
+// var  description_val = "";
 const options = [
   { value: 'Hours', label: 'Hours' },
   { value: 'BillableStatus', label: 'BillableStatus' },
@@ -39,7 +41,7 @@ class MyTime extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      StartTime: new Date(),
+      StartTime: new Date(new Date().toDateString()),
       Hours: "",
       taskId: "",
       isBillable: false,
@@ -50,17 +52,8 @@ class MyTime extends Component {
       classes: [],
       clients: [],
       timesheets:[],
-     selectedTimesheet: {columns: [
-        {
-          'label': 'Check',
-          'field': 'check',
-          'sort': 'asc'
-        },
-        // Add data column to the timesheet
-        // Refresh time for the QBO sandbox (Check: time from app to db to sandbox)
-      ],
-      rows: []},
-
+      status_temp:"WithEmployee",
+      obj_id:"",
       timesheetss: {columns: [
         {
           'label': 'Check',
@@ -74,8 +67,14 @@ class MyTime extends Component {
           width: 150
         },
         {
-          label: 'Client',
+          label: 'CustomerRef',
           field: 'CustomerRef',
+          sort: 'asc',
+          width: 270
+        },
+        {
+          label: 'Date',
+          field: 'StartTime',
           sort: 'asc',
           width: 270
         },
@@ -111,7 +110,7 @@ class MyTime extends Component {
         //   width: 100
         // },
         {
-          label: 'Images',
+          label: 'images',
           field: 'images',
           sort: 'asc',
           width: 100
@@ -123,10 +122,15 @@ class MyTime extends Component {
         //   width: 100
         // },
         {
-          label: 'Status',
+          label: 'status',
           field: 'status',
           sort: 'asc',
           width: 100
+        },
+        {
+          label:'Edit',
+          field:'edit',
+          sort:'asc',
         },
         // {
         //   'label': '',
@@ -191,7 +195,6 @@ class MyTime extends Component {
     this.getClients();
     this.getService();
     // this.sendApproval(this.state.timesheets,0);
-    
   }
   
   getService = () => {
@@ -242,41 +245,49 @@ class MyTime extends Component {
         console.log(error);
       });
   };
-  sendApproval = (timesheet,index) =>{
-    if(timesheet.length==0){
-      alert("Select atleast one timesheet to send to approver");
-    }
-    else{
-      console.log(typeof(timesheet));
-      var self = this;
-      var url = Constants.BASE_URL + "timesheet/updatestatus";
-      var payload = {
-        token: localStorage.getItem("token"),
-        id: timesheet._id,
-      };
-      $("#call-modal-form-filled").removeClass("show");
-      $("#call-modal-form-filled").css("display", "");
-      $(".modal-backdrop.fade.show").remove();
-      axios
-        .post(url, payload)
-        .then(function (response) {
-          console.log(response);
-          if (response.data.success) {
+  
+  sendApproval = () =>{
+    // if(timesheet.length==0){
+    //   alert("Select atleast one timesheet to send to approver");
+    // }
+    console.log("tslength");
+    console.log(this.state.timesheets.length);
+    for(let i =0;i<this.state.timesheets.length;i++){
+      console.log(document.getElementById("checkid"+i));
+      if(document.getElementById("checkid"+i).checked){
+        var self = this;
+        var url = Constants.BASE_URL + "timesheet/updatestatus";
+        var payload = {
+          token: localStorage.getItem("token"),
+          id: self.state.timesheets[i]._id,
+        };
+        $("#call-modal-form-filled").removeClass("show");
+        $("#call-modal-form-filled").css("display", "");
+        $(".modal-backdrop.fade.show").remove();
+        axios
+          .post(url, payload)
+          .then(function (response) {
+            console.log(response);
+            if (response.data.success) {
+              self.setState({ loading: false });
+              window.location.reload(false);
+              ToastsStore.success(response.data.message);
+              console.log(response.data.success);
+            }
+          })
+          .catch(function (error) {
             self.setState({ loading: false });
-            window.location.reload(false);
-            ToastsStore.success(response.data.message);
-            console.log(response.data.success);
-          }
-        })
-        .catch(function (error) {
-          self.setState({ loading: false });
-        });
+            // console.log("Error");
+          });
+      }
     }
-    
+    console.log("sendApproval");
+    // console.log(document.getElementById("checkid8").checked);
+    console.log(this.state.timesheets);
   };
   getMyTimeSheets = () => {
     Moment.locale("en");
-
+    // document.getElementsByTagName("TD").contentEditable = "true";
     var self = this;
 
     var payload = {
@@ -290,50 +301,70 @@ class MyTime extends Component {
         if (response.data.success) {
           let timesheetssCopy = JSON.parse(JSON.stringify(self.state.timesheetss));
           timesheetssCopy.rows = response.data.data;
-          // timesheetssCopy.rows.check = null;
+          console.log(response.data.data);
           self.setState({
             timesheets: response.data.data,
-            // timesheetss:timesheetssCopy,
-            // timesheetss.rows: response.data.data,
             isLoading: false,
             totalCount: Math.ceil(response.data.totalCount / 10),
           });
           
           for (let i =0; i<timesheetssCopy.rows.length;i++){
               let id = "checkbox"+i;
-              timesheetssCopy.rows[i].check = <input type="checkbox" id="checkid" name="check" value="check"/>
+              console.log("checkid"+i);
+              timesheetssCopy.rows[i].check = <input type="checkbox" id={"checkid"+i} name="check" value="check" />
               timesheetssCopy.rows[i].CustomerRef = timesheetssCopy.rows[i].CustomerRef.value;
               timesheetssCopy.rows[i].EmployeeRef = timesheetssCopy.rows[i].EmployeeRef.value;
               timesheetssCopy.rows[i].ItemRef = timesheetssCopy.rows[i].ItemRef.value;
-              // {this.state.timesheets.map((timesheet, index) => (
-              // console.log(self.state.timesheets[i]);
-            //   timesheetssCopy.rows[i].button = <button
-            //   className="dropdown-item"
-            //   //className="btn btn-icon btn-3 btn-primary text-right"
-            //   type="button"
-            //   data-toggle="modal"
-            //   // data-target="#call-modal-form-filled"
-            //   disabled={
-            //     self.state.timesheets[i].status == "Approved" ||
-            //     self.state.timesheets[i].status == "Rejected" ||
-            //     self.state.timesheets[i].status == "Archived"
-            //   }
+              if(self.state.timesheets[i].status=="WithEmployee"){
+                timesheetssCopy.rows[i].edit = <button
+                    type="button"
+                    data-toggle="modal"
+                    id="button1"
+                    data-target="#call-modal-form-filled"
+                    disabled={
+                      self.state.timesheets[i].status == "Approved" ||
+                      self.state.timesheets[i].status == "Rejected" ||
+                      self.state.timesheets[i].status == "Archived"
+                    } 
+                    onClick={() => 
+                      {console.log("UpdateModal");
+                      console.log(self.state.timesheets[i]);
+                      self.setState({
+                        Description : self.state.timesheets[i].Description,
+                        clientValue : self.state.timesheets[i].CustomerRef,
+                        serviceValue : self.state.timesheets[i].ItemRef,
+                        Hours : self.state.timesheets[i].Hours,
+                        StartTime : Date.parse(self.state.timesheets[i].StartTime),
+                        obj_id : self.state.timesheets[i]._id,
+                        status_temp : self.state.timesheets[i].status,
+                        });
+                      
+                      }
+                    }
+                  >
+                    <i class="fas fa-user-edit"></i>
+                  </button>  
+              }else{
+                timesheetssCopy.rows[i].edit = <button
+                  type="button"
+                  data-toggle="modal"
+                  id="button1"
+                  data-target="#call-modal-form-filled"
+                  disabled
+                  title="Cannot edit data sent to approver"
+                >
+                  <i class="fas fa-user-edit"></i>
+                </button>  
+              }
               
-            //   onClick={() => this.sendApproval(self.state.timesheets[i],i)}
-            //   // onClick={() => this.updateModal(index)}
-            // >
-            //   Submit for Approval
-            // </button>
           }
+          
           self.setState({
             
             timesheetss:timesheetssCopy,
-            // timesheetss.rows: response.data.data,
             isLoading: false,
             totalCount: Math.ceil(response.data.totalCount / 10),
-          });
-          // = timesheetssCopy.rows.CustomerRef;
-          
+          });          
           console.log(self.state.timesheetss);
           
         }
@@ -437,7 +468,7 @@ class MyTime extends Component {
     console.log(event);
     var self = this;
     var tc = self.state.timesheetss;
-    for(let i =1;i<self.state.timesheetss.columns.length;i++)
+    for(let i =1;i<self.state.timesheetss.columns.length-1;i++)
       delete tc.columns[i];
     console.log(tc);
     for(let i =0;i<event.length;i++){
@@ -448,8 +479,9 @@ class MyTime extends Component {
 
     self.setState({
       timesheetss:tc,
+      loading:true,
     });
-    console.log(self.state.timesheetsss);
+    console.log(tc);
   };
   handleSubmit = (event) => {
     
@@ -595,6 +627,137 @@ class MyTime extends Component {
   //   }
   // }
   };
+  handleEdit = (event) => {
+    if(this.state.status_temp=="WithEmployee"){
+      
+      event.preventDefault();
+      let images = [];
+      let tokenData = parseJwt();
+      let userId = tokenData.userid;
+      if (Object.keys(this.state.images).length > 0) {
+        let selectedFiles = { ...this.state.images };
+        Object.values(selectedFiles).forEach((file) => {
+          images.push(
+            `timesheet/${userId}/${new Date().getTime()}-${file.name.replace(
+              /&/g,
+              ""
+            )}`
+          );
+        });
+        var self = this;
+        self.setState({ loading: true });
+
+        let uploadUrl = Constants.BASE_URL + "upload/generate-signed-urls";
+        axios
+          .post(uploadUrl, { imageNames: images, token: getToken() })
+          .then(function (response) {
+            if (response.data.success) {
+              let uploadedFiles = [...self.state.images];
+              response.data.data.forEach(async (directObj, index) => {
+                const formData = new FormData();
+                formData.append("key", directObj.params.key);
+                formData.append("acl", directObj.params.acl);
+                formData.append(
+                  "x-amz-credential",
+                  directObj.params["x-amz-credential"]
+                );
+                formData.append(
+                  "x-amz-algorithm",
+                  directObj.params["x-amz-algorithm"]
+                );
+                formData.append("x-amz-date", directObj.params["x-amz-date"]);
+                formData.append("policy", directObj.params["policy"]);
+                formData.append(
+                  "x-amz-signature",
+                  directObj.params["x-amz-signature"]
+                );
+                formData.append("file", uploadedFiles[index]);
+                await fetch(directObj.form_url, {
+                  method: "POST",
+                  body: formData,
+                });
+              });
+              self.editTimeSheet(images);
+              self.setState({
+                clientValue:"default",
+                serviceValue:"default",
+                isVariation: false,
+              });
+              console.log(self.isVariation);
+            }
+          })
+          .catch(function (error) {
+            self.setState({ loading: false });
+            console.log("E");
+          });
+          
+      } else {
+        this.editTimeSheet([]);
+        this.setState({
+          clientValue:"default",
+          serviceValue:"default",
+          isVariation: false,
+        });
+        console.log(this.state.isVariation);
+      }
+    }else{
+      alert('Cannot edit entry already sent to approver');
+    }
+    
+  
+  };
+  editTimeSheet = (images) => {
+    var url = Constants.BASE_URL + "timesheet/edit";
+    var self = this;
+    self.setState({ loading: true });
+    var payload = {
+      token: localStorage.getItem("token"),
+      StartTime: new Date(new Date().toDateString()),
+      Hours: self.state.Hours,
+      clientId: self.state.clientValue,
+      classId: self.state.classId,
+      taskId: self.state.serviceValue,
+      isBillable: self.state.isBillable,
+      Description: self.state.Description,
+      notes: self.state.notes,
+      images: images,
+      empId: self.state.empData["Id"],
+      objid: self.state.obj_id,
+    };
+    $("#call-modal-form").removeClass("show");
+    $("#call-modal-form").css("display", "");
+    $(".modal-backdrop.fade.show").remove();
+
+    axios
+      .post(url, payload)
+      .then(function (response) {
+        if (response.data.success) {
+          let fileUpload = document.getElementById("file_upload");
+          if (fileUpload) {
+            fileUpload["value"] = "";
+            
+          }
+          self.setState({
+            StartTime: new Date(new Date().toDateString()),
+            Hours: "",
+            clientId: "",
+            classId: "",
+            taskId: "",
+            isBillable: false,
+            Description: "",
+            notes: "",
+            images: [],
+            loading:false,
+            timesheets: self.state.timesheets.concat([response.data.data]),
+          });
+          window.location.reload(false);
+        }
+      })
+      .catch(function (error) {
+        self.setState({ loading: false });
+      });
+     
+  };
   handleDraft = (event) => {
     
     event.preventDefault();
@@ -701,7 +864,7 @@ class MyTime extends Component {
             fileUpload["value"] = "";
           }
           self.setState({
-            StartTime: new Date(),
+            StartTime: new Date(new Date().toDateString()),
             Hours: "",
             clientId: "",
             classId: "",
@@ -747,9 +910,10 @@ class MyTime extends Component {
           let fileUpload = document.getElementById("file_upload");
           if (fileUpload) {
             fileUpload["value"] = "";
+            
           }
           self.setState({
-            StartTime: new Date(),
+            StartTime: new Date(new Date().toDateString()),
             Hours: "",
             clientId: "",
             classId: "",
@@ -758,8 +922,10 @@ class MyTime extends Component {
             Description: "",
             notes: "",
             images: [],
+            loading:false,
             timesheets: self.state.timesheets.concat([response.data.data]),
           });
+          window.location.reload(false);
         }
       })
       .catch(function (error) {
@@ -918,84 +1084,85 @@ class MyTime extends Component {
     this.setState({ images: images });
   };
 
-  updateModal = async (index) => {
-    if (
-      this.state.timesheets[index] &&
-      this.state.timesheets[index]["status"] != "Approved" &&
-      this.state.timesheets[index]["status"] != "Rejected" &&
-      this.state.timesheets[index]["status"] != "Archived"
-    ) {
-      if (
-        this.state.timesheets[index].images &&
-        this.state.timesheets[index].images.length
-      ) {
-        var ids = this.state.clientTasks[
-          this.state.timesheets[index].client[0]["Id"]
-        ];
-        this.setState({
-          id: this.state.timesheets[index]._id,
-          hours: this.state.timesheets[index].Hours,
-          description: this.state.timesheets[index].Description,
-          time: this.state.timesheets[index].StartTime,
-          notes: this.state.timesheets[index].notes,
-          client: this.state.timesheets[index].client[0],
-          imgUrls: this.state.timesheets[index].images,
-          image: [],
-          billable:
-            this.state.timesheets[index].BillableStatus == "Billable"
-              ? true
-              : false,
-          time: new Date(),
-          class: this.state.timesheets[index].class[0],
-          taskId:
-            this.state.timesheets[index].task &&
-            this.state.timesheets[index].task.length
-              ? this.state.timesheets[index].task[0]["Id"]
-              : "",
-          taskDropdown: this.state.tasks.filter(
-            (task) => ids.indexOf(task["Id"]) != -1
-          ),
-        });
-        // for (var i = 0; i < imageSet.length; i++) {
-        //   let res = await fetch(imageSet[i]["src"], {
-        //     method: "GET",
-        //   });
-        //   images.push(res);
-        // }
-        // this.setState({ image: images });
-      } else {
-        var ids = this.state.clientTasks[
-          this.state.timesheets[index].client[0]["Id"]
-        ];
-        this.setState({
-          id: this.state.timesheets[index]._id,
-          hours: this.state.timesheets[index].Hours,
-          description: this.state.timesheets[index].Description,
-          time: this.state.timesheets[index].StartTime,
-          notes: this.state.timesheets[index].notes,
-          client: this.state.timesheets[index].client[0],
-          image: [],
-          billable:
-            this.state.timesheets[index].BillableStatus == "Billable"
-              ? true
-              : false,
-          time: new Date(),
-          class: this.state.timesheets[index].class[0],
-          taskId:
-            this.state.timesheets[index].task &&
-            this.state.timesheets[index].task.length
-              ? this.state.timesheets[index].task[0]["Id"]
-              : "",
-          taskDropdown: this.state.tasks.filter(
-            (task) => ids.indexOf(task["Id"]) != -1
-          ),
-        });
-      }
-    } else {
-      ToastsStore.error(
-        "Approved/Archived/Rejected timesheets cannot be edited!"
-      );
-    }
+  updateModal = () => {
+    console.log(document.getElementById('button1'));
+    // if (
+    //   this.state.timesheets[index] &&
+    //   this.state.timesheets[index]["status"] != "Approved" &&
+    //   this.state.timesheets[index]["status"] != "Rejected" &&
+    //   this.state.timesheets[index]["status"] != "Archived"
+    // ) {
+    //   if (
+    //     this.state.timesheets[index].images &&
+    //     this.state.timesheets[index].images.length
+    //   ) {
+    //     var ids = this.state.clientTasks[
+    //       this.state.timesheets[index].client[0]["Id"]
+    //     ];
+    //     this.setState({
+    //       id: this.state.timesheets[index]._id,
+    //       hours: this.state.timesheets[index].Hours,
+    //       description: this.state.timesheets[index].Description,
+    //       time: this.state.timesheets[index].StartTime,
+    //       notes: this.state.timesheets[index].notes,
+    //       client: this.state.timesheets[index].client[0],
+    //       imgUrls: this.state.timesheets[index].images,
+    //       image: [],
+    //       billable:
+    //         this.state.timesheets[index].BillableStatus == "Billable"
+    //           ? true
+    //           : false,
+    //       time: new Date(),
+    //       class: this.state.timesheets[index].class[0],
+    //       taskId:
+    //         this.state.timesheets[index].task &&
+    //         this.state.timesheets[index].task.length
+    //           ? this.state.timesheets[index].task[0]["Id"]
+    //           : "",
+    //       taskDropdown: this.state.tasks.filter(
+    //         (task) => ids.indexOf(task["Id"]) != -1
+    //       ),
+    //     });
+    //     // for (var i = 0; i < imageSet.length; i++) {
+    //     //   let res = await fetch(imageSet[i]["src"], {
+    //     //     method: "GET",
+    //     //   });
+    //     //   images.push(res);
+    //     // }
+    //     // this.setState({ image: images });
+    //   } else {
+    //     var ids = this.state.clientTasks[
+    //       this.state.timesheets[index].client[0]["Id"]
+    //     ];
+    //     this.setState({
+    //       id: this.state.timesheets[index]._id,
+    //       hours: this.state.timesheets[index].Hours,
+    //       description: this.state.timesheets[index].Description,
+    //       time: this.state.timesheets[index].StartTime,
+    //       notes: this.state.timesheets[index].notes,
+    //       client: this.state.timesheets[index].client[0],
+    //       image: [],
+    //       billable:
+    //         this.state.timesheets[index].BillableStatus == "Billable"
+    //           ? true
+    //           : false,
+    //       time: new Date(),
+    //       class: this.state.timesheets[index].class[0],
+    //       taskId:
+    //         this.state.timesheets[index].task &&
+    //         this.state.timesheets[index].task.length
+    //           ? this.state.timesheets[index].task[0]["Id"]
+    //           : "",
+    //       taskDropdown: this.state.tasks.filter(
+    //         (task) => ids.indexOf(task["Id"]) != -1
+    //       ),
+    //     });
+    //   }
+    // } else {
+    //   ToastsStore.error(
+    //     "Approved/Archived/Rejected timesheets cannot be edited!"
+    //   );
+    // }
   };
 
   handleTimeChange = (time) => {
@@ -1557,6 +1724,332 @@ class MyTime extends Component {
               </div>
             </div>
           </div>
+          {/* Trying filled modal */}
+          <div
+            className="modal fade"
+            id="call-modal-form-filled"
+            tabIndex="-1"
+            role="dialog"
+            aria-labelledby="modal-form"
+            aria-hidden="true"
+          >
+            <div
+              className="modal-dialog modal- modal-dialog-centered modal-lg"
+              role="document"
+            >
+              <div className="modal-content">
+                <div className="modal-body p-0">
+                  <div className="card bg-secondary shadow">
+                    <div className="card-header bg-white border-0">
+                      <div className="row align-items-center">
+                        <div className="col-6">
+                          <h3 className="mb-0">My Time</h3>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="card-body text-left">
+                      <form onSubmit={this.handleEdit}>
+                        <div className="pl-lg-4">
+                          <div className="row">
+                            <div className="col-lg-6">
+                              <div className="form-group">
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-country"
+                                >
+                                  Activity Date
+                                </label>
+                                <div className="input-group input-group-alternative">
+                                  <div className="input-group-prepend">
+                                    <span className="input-group-text">
+                                      <Icon
+                                        path={mdiCalendar}
+                                        title="calendar"
+                                        size={0.9}
+                                        horizontal
+                                        vertical
+                                        rotate={180}
+                                        color="#5e72e4"
+                                        className="mr-2"
+                                      />
+                                    </span>
+                                  </div>
+                                  <DatePicker
+                                    className="form-control datepicker"
+                                    selected={this.state.StartTime}
+                                    onChange={this.handleDateChange}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-lg-6">
+                              <div className="form-group">
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-first-name"
+                                >
+                                  Hours
+                                </label>
+                                <input
+                                  type="number"
+                                  id="input-hours"
+                                  className="form-control form-control-alternative"
+                                  placeholder="Hours"
+                                  name="Hours"
+                                  value={this.state.Hours}
+                                  onChange={this.handleChange}
+                                  required
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="row">
+                            <div className="col-lg-6">
+                              <div className="form-group">
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="client"
+                                >
+                                  Client
+                                </label>
+                                
+                                <select
+                                  className="form-control input-group input-group-alternative"
+                                  name="clientId"
+                                  id="client"
+                                  value={this.state.clientValue}
+                                  onChange={this.handleClientChange}
+                                >
+                                  <option value="default">Choose Client</option>
+                                  {/* {this.state.clients.map((client, index) => (
+                                    <React.Fragment>
+                                      <option
+                                        value={client._id}
+                                        key={`client${index}`}
+                                      >
+                                        {client.FullyQualifiedName}
+                                        
+                                      </option>
+                                    </React.Fragment>
+                                  
+                                  ))} */}
+                                  {/* <option>{this.state.clientList}</option> */}
+                                  {/* {this.state.clientList.map((client, index) => (
+                                    <React.Fragment>
+                                      <option
+                                        value={client._id}
+                                        // key={`client${index}`}
+                                      >
+                                        {/* {client.FullyQualifiedName} */}
+                                        {/* {client[0].Hours} */}
+                                        {/* {console.log(client[0])}
+                                      </option>
+                                    </React.Fragment>
+                                  
+                                  ))} */} 
+                                  
+                                  {this.state.clientList.map((clientsList, index) => {
+                                    return <option value={clientsList.CompanyName}>{clientsList.CompanyName}</option>;
+                                  })}
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-lg-6">
+                              <div className="form-group">
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="task"
+                                >
+                                  Service
+                                </label>
+                                <select
+                                  className="form-control input-group input-group-alternative"
+                                  name="taskId"
+                                  id="task"
+                                  value={this.state.serviceValue}
+                                  onChange={this.handleTaskChange}
+                                >
+                                  {/* {this.state.taskDropdown
+                                    ? this.state.taskDropdown.map(
+                                        (task, index) => (
+                                          <React.Fragment>
+                                            <option
+                                              value={task._id}
+                                              key={`class${index}`}
+                                            >
+                                              {task.FullyQualifiedName}
+                                            </option>
+                                          </React.Fragment>
+                                        )
+                                      )
+                                    : ""} */}
+                                    <option value="default">Choose Service</option>
+                                    {this.state.taskList.map((tasksList, index) => {
+                                    return <option value={tasksList.FullyQualifiedName}>{tasksList.FullyQualifiedName}</option>;
+                                  })}
+                                </select>
+                              </div>
+                            </div>
+                            <div className="col-lg-6">
+                              <div className="form-group mt-4">
+                                <div className="custom-control custom-control-alternative custom-checkbox">
+                                  <input
+                                    className="custom-control-input"
+                                    id=" customCheckLogin"
+                                    type="checkbox"
+                                    checked={this.state.isBillable}
+                                    onChange={this.toggleChange}
+                                  />
+                                  <label
+                                    className="custom-control-label"
+                                    htmlFor=" customCheckLogin"
+                                  >
+                                    <span>Variation?</span>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="col-lg-6">
+                              <div className="form-group">
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-last-name"
+                                >
+                                  Description
+                                </label>
+                                <textarea
+                                  rows="4"
+                                  cols="50"
+                                  type="text"
+                                  id="input-last-name"
+                                  className="form-control form-control-alternative"
+                                  placeholder="Description"
+                                  name="Description"
+                                  value={this.state.Description}
+                                  onChange={this.handleChange}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div className="col-lg-6">
+                            {this.state.isVariation ? (
+                              <div className="form-group" >
+                                
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-last-name"
+                                >
+                                  Variation Notes
+                                </label> 
+                                <textarea 
+                                  rows="4"
+                                  cols="50"
+                                  id="input-last-name"
+                                  className="form-control form-control-alternative"
+                                  placeholder="Notes"
+                                  name="notes"
+                                  value={this.state.notes}
+                                  onChange={this.handleChange}
+                                  required={this.state.isBillable}
+                                />
+                              </div>
+                              
+                              ):(<div>{console.log(this.state.isVariation)}</div>)}
+                            
+                            </div>
+                            <div className="col-lg-12">
+                              <div className="form-group">
+                                <label
+                                  className="form-control-label"
+                                  for="file_upload"
+                                >
+                                  Attachements
+                                </label>
+                                <input
+                                  type="file"
+                                  multiple
+                                  id="file_upload"
+                                  className="form-control form-control-alternative"
+                                  placeholder="Images"
+                                  name="images"
+                                  onChange={this.handleFileChange}
+                                />
+                              </div>
+                            </div>
+                            <div className="col-lg-12">
+                              <div className="form-group">
+                                <label
+                                  className="btn btn-secondary"
+                                  for="camera"
+                                >
+                                  Take a photo
+                                </label>
+                                <input
+                                  type="file"
+                                  multiple
+                                  accept="image/*"
+                                  capture="camera"
+                                  className="form-control form-control-alternative"
+                                  id="camera"
+                                  name="camera"
+                                  style={{ display: "none" }}
+                                  onChange={this.handleFileChange}
+                                ></input>
+                              </div>
+                            </div>
+                            {this.state.images && this.state.images.length
+                              ? Array.from(this.state.images).map((img) => (
+                                  <div>
+                                    <span>{img.name}</span>
+                                    <button
+                                      type="button"
+                                      className="btn btn-icon"
+                                      name={img.name}
+                                      onClick={(event) =>
+                                        this.removeFile(event, img.name)
+                                      }
+                                    >
+                                      <Icon
+                                        path={mdiDelete}
+                                        title="delete"
+                                        size={0.9}
+                                        horizontal
+                                        vertical
+                                        rotate={180}
+                                        color="#5e72e4"
+                                        className="mr-2"
+                                      />
+                                    </button>
+                                  </div>
+                                ))
+                              : ""}
+                          </div>
+                        </div>
+                        <div className="modal-footer">
+                          <button
+                            type="button"
+                            className="btn btn-link"
+                            data-dismiss="modal"
+                          >
+                            Close
+                          </button>
+                          <button type="submit" className="btn btn-primary" value="submit">
+                            Edit
+                          </button>
+                          {/* handleDraft */}
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Filled modal ends */}
         </div>
         
         {/* <MDBDataTable
@@ -1566,7 +2059,9 @@ class MyTime extends Component {
           data={this.state.timesheetss}
         /> */}
         {/* Edit option based on status */}
-        <MDBDataTableV5 autoWidth hover responsive checkboxFirstColumn={false} bordered entriesOptions={[5, 20, 25]} entries={5} pagesAmount={4} bodyCheckboxID="id1" data={this.state.timesheetss} />
+        {console.log(this.state.timesheets)}
+        <MDBDataTableV5 sortable autoWidth hover responsive checkboxFirstColumn={false} bordered data={this.state.timesheetss} fullPagination/>
+        
         <button
               // className="dropdown-item"
               className="btn btn-icon btn-3 btn-primary text-right"
@@ -1584,6 +2079,7 @@ class MyTime extends Component {
             >
               Submit for Approval
             </button>
+           
         {/* <MDBTable scrollY>
           <MDBTableHead columns={this.state.timesheetss.columns} />
           <MDBTableBody rows={this.state.timesheetss.rows} />

@@ -21,6 +21,7 @@ table, th, td {
     border: 1px solid azure;
     border-collapse: collapse;
     width: 100%;
+    height:10%;
   } 
 h2 {
     width: 100%; 
@@ -33,5 +34,13 @@ label{
 } 
 .tdDisplay{
     background-color: azure;
+    color:#5e72e4;
+}
+#tableList{
+    width: 25%;
+    margin-bottom:1.5%;
+    height:100%;
+}
+.fas{
     color:#5e72e4;
 }
