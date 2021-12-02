@@ -51,11 +51,12 @@ class Users extends Component {
     var payLoad = {
       token: localStorage.getItem("token"),
     };
-    var url = Constants.BASE_URL + "user/list";
+    var url = Constants.BASE_URL + "employee/list";
     axios
       .post(url, payLoad)
       .then(function (response) {
         if (response.data.success) {
+          console.log("USERLIST");
           console.log(response.data.data);
           self.setState({
             userList: response.data.data,
@@ -63,6 +64,7 @@ class Users extends Component {
         }
       })
       .catch((error) => {
+        console.log("ERROR");
         console.log(error);
         ToastsStore.error(error.message);
       });
@@ -203,7 +205,8 @@ class Users extends Component {
     var url;
     var accessLevels = this.state.accessLevels;
     if (this.state.selectedEmployeeId) url = Constants.BASE_URL + "user/update";
-    else url = Constants.BASE_URL + "user/add";
+    // else url = Constants.BASE_URL + "user/add";
+    else url = Constants.BASE_URL + "employee/register";
     if (this.state.portalAccess && accessLevels.indexOf("PORTAL") == -1)
       accessLevels.push("PORTAL");
     else if (!this.state.portalAccess && accessLevels.indexOf("PORTAL") != -1)
@@ -1039,8 +1042,9 @@ class Users extends Component {
                 <tr key={index}>
                   {this.state.columnsToBeShown.indexOf("NAME") != -1 ? (
                     <td>
-                      <span className="badge badge-dot mr-4">
-                        {user.displayName}
+                      <span className="d-flex align-items-center">
+                        
+                        {user.DisplayName}
                       </span>
                     </td>
                   ) : (
@@ -1048,7 +1052,7 @@ class Users extends Component {
                   )}
                   {this.state.columnsToBeShown.indexOf("EMAIL") != -1 ? (
                     <td>
-                      <span className="badge badge-dot mr-4">{user.email}</span>
+                      <span className="d-flex align-items-center">{user.email}</span>
                     </td>
                   ) : (
                     ""
@@ -1056,7 +1060,7 @@ class Users extends Component {
                   {this.state.columnsToBeShown.indexOf("PHONE") != -1 ? (
                     <td>
                       <div className="d-flex align-items-center">
-                        <span>{user.mobile}</span>
+                        <span>{user.PrimaryPhone.FreeFormNumber}</span>
                       </div>
                     </td>
                   ) : (
@@ -1067,8 +1071,8 @@ class Users extends Component {
                       <div className="d-flex align-items-center">
                         <span>
                           {" "}
-                          {user.access
-                            ? user.access.indexOf("PORTAL") != -1
+                          {user.active
+                            ? true
                               ? "Yes"
                               : "No"
                             : "No"}
@@ -1081,7 +1085,7 @@ class Users extends Component {
                   {this.state.columnsToBeShown.indexOf("USER ROLE") != -1 ? (
                     <td>
                       <div className="d-flex align-items-center">
-                        <span> {user.user_type}</span>
+                        <span> {user.type}</span>
                       </div>
                     </td>
                   ) : (
