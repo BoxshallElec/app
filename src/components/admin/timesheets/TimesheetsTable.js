@@ -9,24 +9,40 @@ import ImgsViewer from "react-images-viewer";
 import { getTimesheetStatus } from "../../../UtilService";
 import axios from "axios";
 import { setDefaultLocale } from "react-datepicker";
+import {Accordion} from 'react-bootstrap';
+import Select from 'react-select';
+import { MDBTable, MDBTableBody, MDBTableHead } from 'mdbreact';
+
+const options = [
+  { value: 'Employees', label: 'Employees' },
+  { value: 'Date', label: 'Date' },
+  ]
 class TimesheetsTable extends Component {
     constructor(props) {
       super(props);
       this.state = {
         isToggle:true,
         clientList:[],
+        employeeList:[],
+        select_val:"",
+        timesheet:[],
+        tsheetstatus:[],
+        dayaccord:[],
+        tsdate:[],
         employeeId:"",
-        clientWork:[],
-        temp:[],
+        loading:false,
         selectedStatus:"",
       };
     }
     componentDidMount(){
         this.getClients();
+        this.getEmployees();
     }
     componentDidUpdate(prevProps, prevState) {
       if (prevProps.selectedStatus !== this.state.selectedStatus) {
-        this.setState({ clientWork: [], isToggle:true, });
+        this.setState({
+          loading:true,
+        });
         var inputs = document.querySelectorAll("input[type='checkbox']");
         for (var i = 0; i < inputs.length; i++) {
           inputs[i].checked = false;
@@ -38,6 +54,7 @@ class TimesheetsTable extends Component {
         return {
           selectedStatus: nextProps.selectedStatus,
         };
+
       }
       return null;
     }
@@ -61,126 +78,289 @@ class TimesheetsTable extends Component {
         .catch(function(error){
             console.log(error)
         });
-    }
-    toggleClientDisplay = (CompanyName,index) =>{
-      // var self = this;  
-      // if(self.state.isToggle){
-      //   self.setState({
-      //         isToggle : false,
-      //     })
-      //   }
-      // else{
-      //   self.setState({
-      //     isToggle: true,
-      //   })
-      // }
-      
-      var node = document.getElementById("td"+index);
-      document.getElementById("i"+index).className = "fas fa-minus";
-      while (node.hasChildNodes()) {
-        node.removeChild(node.lastChild);
-      }
-      
+    };
+    getEmployees = () => {
       var self = this;
-      if(self.state.isToggle){
-        self.setState({
-          isToggle : false,
-        })
-        // document.getElementById("td"+index).style.display="block";
-        // document.getElementById("td"+index).style.columnSpan="all";
-        var payload ={
+      var payload = {
           token:localStorage.getItem("token"),
-          customerref: CompanyName,
-          statusVal: this.props.selectedStatus,
+      };
+      var url = Constants.BASE_URL + "employee/list";
+      axios
+      .post(url,payload)
+      .then(function(response){
+          if(response.data.success){
+            console.log("Response");
+            console.log(response.data.data);
+              self.setState({
+                  employeeList:response.data.data,
+              });
+          }
+      })
+      .catch(function(error){
+          console.log(error)
+      });
+    };
+    getTimesheetofEmployee = (event,employees) =>{
+      console.log(employees._id);
+      var self = this;
+      var payload = {
+          token:localStorage.getItem("token"),
+          _id:employees._id,
+          status:self.state.selectedStatus,
+      };
+      var url = Constants.BASE_URL + "timesheet/listByEmployee";
+      axios
+      .post(url,payload)
+      .then(function(response){
+          if(response.data.success){
+              self.setState({
+                  timesheet:response.data.data,
+              });
+          }
+      })
+      .catch(function(error){
+          console.log(error)
+      });
+    };
+    checkAll = (event,index) =>{
+      document.getElementsByTagName("INPUT").checked = true;
+    };
+    selectedOption = (event) => {
+      var self = this;
+      self.setState({
+        select_val:event.value,
+      });
+      if(event.value=='Date'){
+        
+        var payload = {
+            token:localStorage.getItem("token"),
+            status:self.state.selectedStatus,
         };
-        var url = Constants.BASE_URL + "timesheet/listByCompany";
+        var url = Constants.BASE_URL + "timesheet/listByStatus";
         axios
         .post(url,payload)
         .then(function(response){
-          if(response.data.success){
-            self.setState({
-              clientWork:response.data.data});
-            console.log("Works:"); 
-            for(let i =0;i<self.state.clientWork.length;i++){
-              // document.getElementById("div"+index).innerHTML =             
-              var child_node = document.createElement("label");
-              var text = document.createTextNode("Employee: "+self.state.clientWork[i].Hours);
-              child_node.appendChild(text);
-              document.getElementById("td"+index).appendChild(child_node);
-  
-              var child_node = document.createElement("label");
-              var text = document.createTextNode("HOURS: "+self.state.clientWork[i].Hours);
-              child_node.appendChild(text);
-              document.getElementById("td"+index).appendChild(child_node);
-             
-              var child_node = document.createElement("label");
-              var text = document.createTextNode("Billable Status: "+self.state.clientWork[i].BillableStatus);
-              child_node.appendChild(text);
-              document.getElementById("td"+index).appendChild(child_node);
-              var h2 = document.createElement("h2");
-              document.getElementById("td"+index).appendChild(h2);
+            if(response.data.success){
+              console.log("ResponseE");
+              console.log(response.data.data);
+                self.setState({
+                    tsheetstatus:response.data.data,
+                    // dayaccord:response.data.data.StartTime,
+                });
+                console.log(self.state.tsheetstatus);
+              let daytemp = [];
+              for(let i =0; i < self.state.tsheetstatus.length; i++){
+                daytemp[i] = self.state.tsheetstatus[i].StartTime;
+              }
+              daytemp = daytemp.sort();
+              let dayaccordtemp = [...new Set(daytemp)];
+              console.log(dayaccordtemp);
+              self.setState({
+                  dayaccord:dayaccordtemp,
+              });
             }
-            // document.getElementById("l"+index+"in"+ind).innerHTML = self.state.clientWork[0].Hours;
-          }
         })
         .catch(function(error){
-          console.log("ERROR");
+            console.log(error)
         });
-      }else{
-        self.setState({
-          isToggle : true,
-        })
-        document.getElementById("i"+index).className = "fas fa-plus";
-        var node = document.getElementById("td"+index);
-        while (node.hasChildNodes()) {
-          node.removeChild(node.lastChild);
+        
+      }
+    };
+    getTimesheetfromTime = (event,day) => {
+      var self = this;
+      let tsheetCopy = [];
+      let j =0;
+      for(let i =0;i<self.state.tsheetstatus.length;i++){
+        console.log(self.state.tsheetstatus[i]);
+        if(self.state.tsheetstatus[i].StartTime == day){
+          tsheetCopy[j] = self.state.tsheetstatus[i];
+          j++;
         }
       }
-
-    }
-    
+      self.setState({
+        tsdate:tsheetCopy,
+      });
+      // console.log(self.state.tsheetstatus);
+    };
     render(){
         return (
-          <div>{this.state.clientList.map((clients,index) => (
-            <table className="clientTable">
-              <tr >
-              <td>{clients.CompanyName}</td>
-              {/* {!this.state.isToggle ? 
-                <button className="btn" onClick={this.toggleClientDisplay(clients.CompanyName)}><i class="fas fa-plus"></i></button>
-                :
-                <button className="btn" onClick={this.toggleClientDispla(clients.CompanyName)}><i class="fas fa-minus"></i></button>
-              } */}
-              {/* <button className="btn" onClick={this.toggleClientDisplay} ><i class="fas fa-plus" id="btn1"></i></button> */}
-              <td>
-              <button
-                          className="btn"
-                          // type="button"
-                          // data-toggle="modal"
-                          onClick={() => this.toggleClientDisplay(clients.CompanyName,index)}
-                        >
-                          <i className="fas fa-plus" id={"i"+index}></i>
-                        </button>
-              </td>
-              
-              </tr>
-              <tr >
-                <td id={"td"+index} colspan="2" className="tdDisplay">
-                  {/* {this.state.clientWork.map((work,ind) => (
-                    <label id={"l"+index+"in"+ind}>{work.Hours}</label>
-                  )
-                  )}
-                  <label></label> */}
-                </td>
-              </tr>
-              {/* <div>{this.state.clientWork.map((work,index1) => (
-                <div id={"div"+index}>{work.Hours}</div>
-              )
-
-              )}</div> */}
-            </table>
-          )
-          )}
+         
+          <div> Sort By:
+            <Select options={options} onChange={this.selectedOption} value={this.state.select_val}/>
             
+            {this.state.select_val=='Date' ?
+             (
+              //  <Accordion id ="accordian">
+              //     {this.state.tsheetstatus.map((employees,index) => (
+              //       <Accordion.Item eventKey={index}>
+              //       </Accordian.Item>
+              //     ))}
+              //  </Accordion>
+              
+               <Accordion id ="accordian">
+                  {console.log(this.state.dayaccord)}
+                  {this.state.dayaccord.map((day,index) => (
+                    <Accordion.Item eventKey={index}>
+                      <Accordion.Header onClick={(e) => this.getTimesheetfromTime(e,day)} >
+                        <input type="checkbox" id={"namecheck"+index} className={"namecheck"+index} onChange={(e) => this.checkAll(e,index)}></input>
+                          &nbsp;&nbsp;{new Date(day).toLocaleDateString('en-GB',{day: 'numeric', month: 'short', year: 'numeric'})}
+                      </Accordion.Header>
+                      {this.state.tsdate.map((dateentry,ind) => (
+                        // <Accordion.Item eventKey={ind}>
+                        <Accordion.Body>
+                          <Accordion>
+                            <Accordion.Item eventKey={ind}> 
+                              <Accordion.Header>
+                                {dateentry.EmployeeRef.value}
+                              </Accordion.Header>
+                              
+                              <Accordion.Body>
+                              <MDBTable>
+                                <thead>
+                                  <tr>
+                                    <th><input type="checkbox" id={"insidecheck"+index} class={"insidecheck"+index} name={"insidecheck"+index} value="head"></input>&nbsp;&nbsp;CLIENT</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>HOURS</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>TASKS</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>BILLABLE STATUS</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>DATE UPDATED</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>{dateentry.CustomerRef.value}</td>
+                                  {/* </tr> */}
+                                  {/* <tr> */}
+                                    <td>{dateentry.Hours}</td>
+                                  {/* </tr>
+                                  <tr>
+                                     */}
+                                    <td>{dateentry.ItemRef.value}</td>
+                                  {/* </tr>
+                                  <tr>
+                                     */}
+                                    <td>{dateentry.BillableStatus}</td>
+                                  {/* </tr>
+                                  <tr> */}
+                                    
+                                    <td>{dateentry.StartTime}</td>
+                                  </tr>
+                                </tbody>
+                              
+                              </MDBTable>
+                              </Accordion.Body>
+                            </Accordion.Item>
+                          </Accordion>
+                          
+
+                      </Accordion.Body>
+                      // </Accordion.Item>
+                        // <Accordion activeKey={ind}>
+                        //   <Accordion.Item eventKey={ind}> 
+                        //     <Accordion.Header>
+                        //       Demo
+                        //     </Accordion.Header>
+                        //     <Accordion.Body>
+                        //       Ahhan
+                        //     </Accordion.Body>
+                        //   </Accordion.Item>
+                        // </Accordion>
+                       ))}
+                    
+                  </Accordion.Item>
+                  ))}
+                  
+                </Accordion> 
+             )
+             :(
+               <Accordion id ="accordian">
+                  {this.state.employeeList.map((employees,index) => (
+                    <Accordion.Item eventKey={index}>
+                      <Accordion.Header onClick={(e) => this.getTimesheetofEmployee(e,employees)} >
+                        <input type="checkbox" id={"namecheck"+index} className={"namecheck"+index} onChange={(e) => this.checkAll(e,index)}></input>
+                          &nbsp;&nbsp;{employees.DisplayName}
+                      </Accordion.Header>
+                      {this.state.timesheet.map((employeetime,ind) => (
+                        <Accordion.Body>
+                          <MDBTable>
+                                <thead>
+                                  <tr>
+                                    <th><input type="checkbox" id={"insidecheck"+index} class={"insidecheck"+index} name={"insidecheck"+index} value="head"></input>&nbsp;&nbsp;CLIENT</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>HOURS</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>TASKS</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>BILLABLE STATUS</th>
+                                  {/* </tr>
+                                  <tr> */}
+                                    <th>DATE UPDATED</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>{employeetime.CustomerRef.value}</td>
+                                  {/* </tr> */}
+                                  {/* <tr> */}
+                                    <td>{employeetime.Hours}</td>
+                                  {/* </tr>
+                                  <tr>
+                                     */}
+                                    <td>{employeetime.ItemRef.value}</td>
+                                  {/* </tr>
+                                  <tr>
+                                     */}
+                                    <td>{employeetime.BillableStatus}</td>
+                                  {/* </tr>
+                                  <tr> */}
+                                    
+                                    <td>{employeetime.StartTime}</td>
+                                  </tr>
+                                </tbody>
+                              
+                              </MDBTable>
+                          {/* <table>
+                            <tr>
+                              <th><input type="checkbox" id={"insidecheck"+index} class={"insidecheck"+index} name={"insidecheck"+index} value="head"></input>&nbsp;&nbsp;CLIENT</th>
+                              <td>{employeetime.CustomerRef.value}</td>
+                            </tr>
+                            <tr>
+                              <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HOURS</th>
+                              <td>{employeetime.Hours}</td>
+                            </tr>
+                            <tr>
+                              <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TASKS</th>
+                              <td>{employeetime.ItemRef.value}</td>
+                            </tr>
+                            <tr>
+                              <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BILLABLE STATUS</th>
+                              <td>{employeetime.BillableStatus}</td>
+                            </tr>
+                            <tr>
+                              <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DATE UPDATED</th>
+                              <td>{employeetime.StartTime}</td>
+                            </tr>
+                          </table> */}
+
+                      </Accordion.Body>
+                      ))}
+                    
+                  </Accordion.Item>
+                  ))}
+                  
+                </Accordion> 
+             )}
+                     
           </div>
         );
     }
