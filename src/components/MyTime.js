@@ -24,7 +24,7 @@ import fscreen from "fscreen";
 import { MDBDataTable, MDBInput } from "mdbreact";
 import { MDBTable, MDBTableBody, MDBTableHead } from 'mdbreact';
 import { MDBDataTableV5 } from 'mdbreact';
-import Select from 'react-select'
+import Select from 'react-select';
 
 const $ = window.$;
 var index_val = 0;
