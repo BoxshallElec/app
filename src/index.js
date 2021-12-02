@@ -7,11 +7,11 @@ import ChangePassword from "./components/ChangePassword";
 import AddEmployee from "./components/AddEmployee";
 import "./css/argon.min.css";
 import "./css/index.css";
-import "argon-design-system-free/assets/vendor/headroom/headroom.min.js";
-import "argon-design-system-free/assets/js/argon.js?v=1.1.0";
+// import "argon-design-system-free/assets/vendor/headroom/headroom.min.js";
+// import "argon-design-system-free/assets/js/argon.js?v=1.1.0";
 import "./css/argon-dashboard.min.css";
-import "@creative-tim-official/argon-dashboard-free/assets/js/argon-dashboard.min.js";
-import "@creative-tim-official/argon-dashboard-free/assets/js/plugins/nucleo/css/nucleo.css";
+// import "@creative-tim-official/argon-dashboard-free/assets/js/argon-dashboard.min.js";
+// import "@creative-tim-official/argon-dashboard-free/assets/js/plugins/nucleo/css/nucleo.css";
 import * as serviceWorker from "./serviceWorker";
 import { ConfirmDialogProvider } from "./components/common/ConfirmDialogProvide";
 
