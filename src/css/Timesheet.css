@@ -20,7 +20,7 @@
 table, th, td {
     border: 1px solid azure;
     border-collapse: collapse;
-    width: 100%;
+    width: 70%;
     height:10%;
   } 
 h2 {
@@ -43,4 +43,24 @@ label{
 }
 .fas{
     color:#5e72e4;
+}
+.clientInfo h4,
+.clientInfo p{
+    display: inline;
+}
+.hoursInfo h4,
+.hoursInfo p{
+    display: inline;
+}
+.taskInfo h4,
+.taskInfo p{
+    display: inline;
+}
+.billInfo h4,
+.billInfo p{
+    display: inline;
+}
+.dateInfo h4,
+.dateInfo p{
+    display: inline;
 }
