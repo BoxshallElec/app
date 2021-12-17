@@ -3,6 +3,9 @@ import AddCostRateDialog from "./AddCostRateDialog";
 import axios from "axios";
 import * as Constants from "../Constant";
 import moment from "moment";
+let flag =0;
+let demo = [];
+let vendor = [];
 class UserRatesMain extends Component {
   constructor(props) {
     super(props);
@@ -21,6 +24,7 @@ class UserRatesMain extends Component {
       employeeList: [],
       suppliersList: [],
       accountList: [],
+      isSuper:false,
       taxList: [
         { value: "TaxExcluded", key: "Tax Excluded" },
         { value: "TaxInclusive", key: "Tax Inclusive" },
@@ -42,6 +46,7 @@ class UserRatesMain extends Component {
     };
   }
   componentDidMount() {
+    this.getValues();
     var self = this;
     var payLoad = {
       token: localStorage.getItem("token"),
@@ -110,25 +115,70 @@ class UserRatesMain extends Component {
           taxTypeApplicable: userSelected["linkedSupplierSettings"]["taxType"],
         });
     }
-    var url1 = Constants.BASE_URL + "employee/getAllEmployees";
-    var url2 = Constants.BASE_URL + "vendor/list";
-    var url3 = Constants.BASE_URL + "account/list";
-    const promises = Promise.all([
-      axios.post(url1, payLoad),
-      axios.post(url2, payLoad),
-      axios.post(url3, payLoad),
-    ]);
-    promises
-      .then(([res1, res2, res3]) => {
-        self.setState({
-          employeeList: res1.data.data,
-          suppliersList: res2.data.data,
-          accountList: res3.data.data,
-        });
+    // var url1 = Constants.BASE_URL + "employee/getAllEmployeesQBO";
+    // var url2 = Constants.BASE_URL + "vendor/list";
+    // // var url3 = Constants.BASE_URL + "account/list";
+    // const promises = Promise.all([
+    //   axios.post(url1, payLoad),
+    //   // axios.post(url2, payLoad),
+    //   // axios.post(url3, payLoad),
+    // ]);
+    // promises
+    //   .then(([res1]) => {
+    //     self.setState({
+    //       employeeList: res1.data.data,
+    //       // suppliersList: res2.data.data,
+    //       // accountList: res3.data.data,
+    //     });
+    //     console.log("Employees");
+    //     console.log(self.state.employeeList);
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //     this.props.showToast(error.message, "error");
+    //   });
+  }
+  getValues = () => {
+    var url = Constants.BASE_URL + "employee/getAllEmployeesQBO";
+    var self = this;
+    var payload = {
+      token: localStorage.getItem("token"),
+    };
+    axios
+      .post(url,payload)
+      .then(function(response){
+        if(response.data.success){
+          demo = response.data.data.QueryResponse.Employee;
+          console.log(response.data.data);
+          self.setState({employeeList:response.data.data});
+        }
       })
-      .catch((error) => {
+      .catch(function(error){
+        self.setState({
+          isLoading: false,
+        });
         console.log(error);
-        this.props.showToast(error.message, "error");
+      });
+      flag = 1;
+    var url = Constants.BASE_URL + "vendor/list";
+    var self = this;
+    var payload = {
+      token: localStorage.getItem("token"),
+    };
+    axios
+      .post(url,payload)
+      .then(function(response){
+        if(response.data.success){
+          vendor = response.data.data.QueryResponse.Vendor;
+          console.log(response.data.data);
+          self.setState({suppliersList:response.data.data});
+        }
+      })
+      .catch(function(error){
+        self.setState({
+          isLoading: false,
+        });
+        console.log(error);
       });
   }
 
@@ -223,6 +273,8 @@ class UserRatesMain extends Component {
 
   handleCheckbox = (event, field) => {
     this.setState({ [field]: event.target.checked });
+    if (event.target.name == "superAnnuationRequired")
+      this.setState({isSuper: !this.state.isSuper});
   };
 
   handleChange = (event) => {
@@ -300,12 +352,15 @@ class UserRatesMain extends Component {
           <div className="row">
             <div className="col col-lg-6 col-md-6 col-sm-12 col-xs-12">
               <div class="dropdown">
+              {flag
+                      ? 
                 <div class="form-group">
                   <label
                     className="form-control-label"
                     htmlFor="linkedEmployee"
                   >
                     Select Employee to link
+                    {/* {console.log(demo)} */}
                   </label>
                   <select
                     className="form-control input-group input-group-alternative"
@@ -313,19 +368,21 @@ class UserRatesMain extends Component {
                     id="linkedEmployee"
                     value={this.state.linkedEmployee}
                     onChange={(e) => this.handleDropdown(e, "linkedEmployee")}
-                  >
+                  >                    
                     <option value=""></option>
-                    {this.state.employeeList
-                      ? this.state.employeeList.map((emp, index) => (
+                   {demo.map((emp, index) => (
                           <React.Fragment>
                             <option value={emp.id} key={`emp${index}`}>
-                              {emp.displayName}
+                              {emp.DisplayName}
                             </option>
+                   
                           </React.Fragment>
                         ))
-                      : ""}
+                   }
+                   {/* {console.log(demo)} */}
                   </select>
                 </div>
+                : ""}
               </div>
             </div>
           </div>
@@ -431,12 +488,12 @@ class UserRatesMain extends Component {
                     onChange={(e) => this.handleDropdown(e, "linkedSupplier")}
                   >
                     <option value=""></option>
-                    {this.state.suppliersList
-                      ? this.state.suppliersList.map((sup, index) =>
+                    {vendor
+                      ? vendor.map((sup, index) =>
                           sup["Active"] ? (
                             <React.Fragment>
                               <option value={sup.Id} key={`emp${index}`}>
-                                {sup.DisplayName}
+                                {sup.CompanyName || sup.DisplayName}
                               </option>
                             </React.Fragment>
                           ) : (
@@ -444,6 +501,7 @@ class UserRatesMain extends Component {
                           )
                         )
                       : ""}
+                      {/* {console.log(vendor)} */}
                   </select>
                 </div>
               </div>
@@ -565,7 +623,8 @@ class UserRatesMain extends Component {
                 </div>
               </div>
             </div>
-            <div className="row">
+          <div className="condition">
+          <div className="row">
               <div className="custom-control custom-control-alternative custom-checkbox">
                 <div class="form-group">
                   <input
@@ -578,6 +637,7 @@ class UserRatesMain extends Component {
                       this.handleCheckbox(event, "superAnnuationRequired")
                     }
                   />
+                  
                   <label
                     className="custom-control-label"
                     htmlFor="superAnnuationRequired"
@@ -587,6 +647,8 @@ class UserRatesMain extends Component {
                 </div>
               </div>
             </div>
+            {this.state.isSuper ?(
+            <div>
             <div className="row">
               <div className="form-group">
                 <label
@@ -642,6 +704,7 @@ class UserRatesMain extends Component {
                 </div>
               </div>
             </div>
+            
             <div className="row">
               <div class="dropdown">
                 <div class="form-group">
@@ -679,6 +742,10 @@ class UserRatesMain extends Component {
                 </div>
               </div>
             </div>
+            </div>
+            ):""}
+            </div>
+
             <div className="row">
               <button
                 className="btn btn-primary text-uppercase mb-4"

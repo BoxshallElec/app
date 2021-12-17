@@ -103,7 +103,9 @@ class Users extends Component {
   handleEditUser = (index) => {
     var self = this;
     let user = { ...this.state.userList[index] };
-    var url = Constants.BASE_URL + "user/getApprovers";
+    console.log("User");
+    console.log(user);
+    var url = Constants.BASE_URL + "employee/getApprover";
     this.setState({ loading: true });
     var payLoad = {
       selectedUser: user["_id"],
@@ -119,10 +121,10 @@ class Users extends Component {
               FamilyName: user.middleName || "",
               Title: user.title,
               PrimaryPhone: user.mobile,
-              CountrySubDivisionCode: user.primaryAddr.CountrySubDivisionCode,
-              City: user.primaryAddr.City,
-              PostalCode: user.primaryAddr.PostalCode,
-              Line1: user.primaryAddr.Line1,
+              CountrySubDivisionCode: user.PrimaryAddr.CountrySubDivisionCode,
+              City: user.PrimaryAddr.City,
+              PostalCode: user.PrimaryAddr.PostalCode,
+              Line1: user.PrimaryAddr.Line1,
               email: user.email,
               HiredDate: user.HiredDate ? new Date(user.HiredDate) : "",
               ReleasedDate: user.ReleasedDate
@@ -132,16 +134,16 @@ class Users extends Component {
               possibleApprovers: response.data.data,
               approverId: user.approver,
               DisplayName: user.displayName,
-              portalAccess: user.access
-                ? user.access.indexOf("PORTAL") != -1
-                  ? true
-                  : false
-                : false,
-              accessLevels: user.access,
-              approverId: user.approver,
-              loading: false,
-              approvalRequired: user.approver ? true : false,
-              invitationSent: user.invitation ? true : false,
+              // portalAccess: user.access
+              //   ? user.access.indexOf("PORTAL") != -1
+              //     ? true
+              //     : false
+              //   : false,
+              // accessLevels: user.access,
+              // approverId: user.approver,
+              // loading: false,
+              // approvalRequired: user.approver ? true : false,
+              // invitationSent: user.invitation ? true : false,
             },
             () => {
               window.$("#call-modal-form").modal("show");
@@ -205,8 +207,10 @@ class Users extends Component {
     var url;
     var accessLevels = this.state.accessLevels;
     if (this.state.selectedEmployeeId) url = Constants.BASE_URL + "user/update";
-    // else url = Constants.BASE_URL + "user/add";
+    // console.log("Intuit");
+    // url = Constants.BASE_URL + "intuit/demo";
     else url = Constants.BASE_URL + "employee/register";
+    // else url = Constants.BASE_URL + "demo/";
     if (this.state.portalAccess && accessLevels.indexOf("PORTAL") == -1)
       accessLevels.push("PORTAL");
     else if (!this.state.portalAccess && accessLevels.indexOf("PORTAL") != -1)
@@ -231,6 +235,8 @@ class Users extends Component {
     axios
       .post(url, payload)
       .then(function (response) {
+        console.log("Response");
+        console.log(response);
         self.setState({ loading: false });
         if (response.data.success) {
           ToastsStore.success(response.data.message);
