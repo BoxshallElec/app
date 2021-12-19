@@ -6,6 +6,7 @@ import moment from "moment";
 let flag =0;
 let demo = [];
 let vendor = [];
+let tax = [];
 class UserRatesMain extends Component {
   constructor(props) {
     super(props);
@@ -170,6 +171,28 @@ class UserRatesMain extends Component {
       .then(function(response){
         if(response.data.success){
           vendor = response.data.data.QueryResponse.Vendor;
+          console.log(response.data.data);
+          self.setState({suppliersList:response.data.data});
+        }
+      })
+      .catch(function(error){
+        self.setState({
+          isLoading: false,
+        });
+        console.log(error);
+      });
+    var url = Constants.BASE_URL + "employee/getTaxQBO";
+    var self = this;
+    var payload = {
+      token: localStorage.getItem("token"),
+    };
+    axios
+      .post(url,payload)
+      .then(function(response){
+        if(response.data.success){
+          tax = response.data.data.QueryResponse;
+          tax = tax.Account;
+          console.log("Tax");
           console.log(response.data.data);
           self.setState({suppliersList:response.data.data});
         }
@@ -569,7 +592,7 @@ class UserRatesMain extends Component {
             </div>
             <div className="row">
               <div className="custom-control custom-control-alternative custom-checkbox">
-                <div class="form-group">
+                {/* <div class="form-group">
                   <input
                     className="custom-control-input"
                     id="supplier_gst"
@@ -586,7 +609,7 @@ class UserRatesMain extends Component {
                   >
                     GST/Tax
                   </label>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="row">
@@ -606,19 +629,33 @@ class UserRatesMain extends Component {
                     required={this.state.GSTApplicable}
                   >
                     <option value=""></option>
-                    {this.state.taxList
-                      ? this.state.taxList.map((tax, index) =>
-                          tax["key"] ? (
+                    {/* {tax
+                      ? tax.map((tax1, index) =>
+                          tax1["key"] ? (
                             <React.Fragment>
-                              <option value={tax.value} key={`emp${index}`}>
-                                {tax.key}
+                              <option value={tax1.value} key={`emp${index}`}>
+                                {tax1.key}
                               </option>
                             </React.Fragment>
                           ) : (
                             ""
                           )
                         )
-                      : ""}
+                      : ""} */}
+                      {/* {console} */}
+                      {
+                        tax
+                        ? tax.map((sup, index) =>
+                            
+                              <React.Fragment>
+                                <option value={sup.Id} key={`emp${index}`}>
+                                  {sup.FullyQualifiedName}
+                                </option>
+                              </React.Fragment>
+                            
+                          )
+                        : ""
+                      }
                   </select>
                 </div>
               </div>
@@ -686,8 +723,8 @@ class UserRatesMain extends Component {
                     onChange={(e) => this.handleDropdown(e, "superBaseAccount")}
                     required={this.state.superAnnuationRequired}
                   >
-                    <option value=""></option>
-                    {this.state.accountList
+                    <option value="Superannuation">Superannuation</option>
+                    {/* {this.state.accountList
                       ? this.state.accountList.map((account, index) =>
                           account["Id"] ? (
                             <React.Fragment>
@@ -699,7 +736,7 @@ class UserRatesMain extends Component {
                             ""
                           )
                         )
-                      : ""}
+                      : ""} */}
                   </select>
                 </div>
               </div>
@@ -724,8 +761,8 @@ class UserRatesMain extends Component {
                     }
                     required={this.state.superAnnuationRequired}
                   >
-                    <option value=""></option>
-                    {this.state.accountList
+                    <option value="Accounts Payable (A/P)">Accounts Payable (A/P)</option>
+                    {/* {this.state.accountList
                       ? this.state.accountList.map((account, index) =>
                           account["Id"] ? (
                             <React.Fragment>
@@ -737,7 +774,7 @@ class UserRatesMain extends Component {
                             ""
                           )
                         )
-                      : ""}
+                      : ""} */}
                   </select>
                 </div>
               </div>

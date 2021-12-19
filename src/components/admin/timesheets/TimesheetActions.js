@@ -3,6 +3,11 @@ import "./admin-timesheets.css";
 import "../../../css/Employees.css";
 import moment from "moment";
 import { APPROVAL_STATUS, TIMESHEET_STATUS } from "../../Constant";
+import ReactExport from "react-export-excel";
+const ExcelFile = ReactExport.ExcelFile;
+const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+
 class TimeSheetActions extends Component {
   constructor(props) {
     super(props);
@@ -20,7 +25,10 @@ class TimeSheetActions extends Component {
   };
   render() {
     return (
+      
       <React.Fragment>
+        {console.log("Timehett")}
+        {console.log(this.props.timesheetData)};
         <div className="tab-content">
           <div className="container-fluid">
             <div className="row">
@@ -35,6 +43,7 @@ class TimeSheetActions extends Component {
                         onClick={this.props.sendToQuickBook}
                       >
                         Send To Quickbook
+
                       </button>
                     </div>
                   </div>
@@ -42,14 +51,15 @@ class TimeSheetActions extends Component {
               ) : (
                 ""
               )}
-              {this.props.selectedStatus === "Approved" ? (
+              {this.props.selectedStatus === "Approved" || this.props.selectedStatus === "WithApprover" ? (
                 <div className="col-xl-3 col-lg-4 col-md-7 col-sm-6 col-xs-12 marginBottom">
                   <div className="align-items-center d-flex">
                     <div className="flex-column d-flex justify-content-center">
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        disabled={this.props.timesheetData ? false : true}
+                        onClick={this.DownloadTimesheet}
+                        // disabled={this.props.timesheetData ? false : true}
                       >
                         Download Timesheet
                       </button>
