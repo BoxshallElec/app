@@ -7,6 +7,7 @@ let flag =0;
 let demo = [];
 let vendor = [];
 let tax = [];
+let rate_val
 class UserRatesMain extends Component {
   constructor(props) {
     super(props);
@@ -305,7 +306,7 @@ class UserRatesMain extends Component {
   };
 
   handleSave = (type) => {
-    var url = Constants.BASE_URL + "user/linkEmployee";
+    var url = Constants.BASE_URL + "employee/linkEmployee";
     if (
       (type == "employee" &&
         this.state.linkedEmployee &&
@@ -321,14 +322,25 @@ class UserRatesMain extends Component {
             this.state.superBaseAccount &&
             this.state.superPayableAccount)))
     ) {
+      console.log("Employee");
+        console.log(this.state.hourlyRates.rate);
       var payload;
       if (type == "employee")
+        
         payload = {
           linkEmployeeId: this.state.linkedEmployee,
           linkUserId: this.props.employeeId,
           token: localStorage.getItem("token"),
-          hourlyRate: this.state.hourlyRates,
+          hourlyRate: rate_val,
           quickBookSync: this.state.quickBookSyncEmployee,
+          taxRequired: this.state.GSTApplicable,
+          taxType: this.state.taxTypeApplicable,
+          superRequired: this.state.superAnnuationRequired,
+          superPercentage: this.state.superAnuationPercentage,
+          superBase: this.state.superBaseAccount,
+          superPayable: this.state.superPayableAccount,
+          linkSupplierId:this.state.linkedSupplier,
+          supplierBillVoid:this.state.voidSupplierBill,
           type: "Employee",
         };
       else
@@ -457,6 +469,7 @@ class UserRatesMain extends Component {
                         <td>
                           {moment(costRate.beginDate).format("Do MMM YYYY")}
                         </td>
+                        {rate_val = costRate.rate}
                         <td>{costRate.rate}</td>
                         <td>
                           <button
@@ -622,13 +635,13 @@ class UserRatesMain extends Component {
                     className="form-control input-group input-group-alternative"
                     name="gst_type"
                     id="gst_type"
-                    value={this.state.taxTypeApplicable}
+                    value={this.state.value}
                     onChange={(e) =>
                       this.handleDropdown(e, "taxTypeApplicable")
                     }
                     required={this.state.GSTApplicable}
                   >
-                    <option value=""></option>
+                    <option value={this.state.value}></option>
                     {/* {tax
                       ? tax.map((tax1, index) =>
                           tax1["key"] ? (
@@ -648,7 +661,7 @@ class UserRatesMain extends Component {
                         ? tax.map((sup, index) =>
                             
                               <React.Fragment>
-                                <option value={sup.Id} key={`emp${index}`}>
+                                <option value={sup.FullyQualifiedName} key={`emp${index}`}>
                                   {sup.FullyQualifiedName}
                                 </option>
                               </React.Fragment>
@@ -719,11 +732,12 @@ class UserRatesMain extends Component {
                     className="form-control input-group input-group-alternative"
                     name="supplier_superbase"
                     id="supplier_superbase"
-                    value={this.state.superBaseAccount}
+                    value="Superannuation"
                     onChange={(e) => this.handleDropdown(e, "superBaseAccount")}
                     required={this.state.superAnnuationRequired}
                   >
                     <option value="Superannuation">Superannuation</option>
+                    {this.state.superBaseAccount="Superannuation"}
                     {/* {this.state.accountList
                       ? this.state.accountList.map((account, index) =>
                           account["Id"] ? (
@@ -755,13 +769,14 @@ class UserRatesMain extends Component {
                     className="form-control input-group input-group-alternative"
                     name="supplier_superPayable"
                     id="supplier_superPayable"
-                    value={this.state.superPayableAccount}
+                    value="Accounts Payable (A/P)"
                     onChange={(e) =>
                       this.handleDropdown(e, "superPayableAccount")
                     }
                     required={this.state.superAnnuationRequired}
                   >
                     <option value="Accounts Payable (A/P)">Accounts Payable (A/P)</option>
+                    {this.state.superPayableAccount="Accounts Payable (A/P)"}
                     {/* {this.state.accountList
                       ? this.state.accountList.map((account, index) =>
                           account["Id"] ? (
@@ -787,7 +802,7 @@ class UserRatesMain extends Component {
               <button
                 className="btn btn-primary text-uppercase mb-4"
                 type="button"
-                onClick={() => this.handleSave("supplier")}
+                onClick={() => this.handleSave("employee")}
               >
                 Save
               </button>

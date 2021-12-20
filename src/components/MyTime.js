@@ -245,7 +245,35 @@ class MyTime extends Component {
         console.log(error);
       });
   };
+  getClients = () => {
+    // this.setState({
+    //   clientId: "demo", 
+    // });
+    var self = this;
   
+    var payload = {
+      token: localStorage.getItem("token"),
+    };
+  
+    var url = Constants.BASE_URL + "client/listQBO";
+    axios
+      .post(url, payload)
+      .then(function (response) {
+        console.log("Res");
+        console.log(response.data.data.QueryResponse.Customer);
+        if (response.data.success) {
+          self.setState({
+            clientList: response.data.data.QueryResponse.Customer,
+          });
+        }
+      })
+      .catch(function (error) {
+        self.setState({
+          isLoading: false,
+        });
+        console.log(error);
+      });
+  };
   sendApproval = () =>{
     // if(timesheet.length==0){
     //   alert("Select atleast one timesheet to send to approver");
