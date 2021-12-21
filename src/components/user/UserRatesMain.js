@@ -6,7 +6,9 @@ import moment from "moment";
 let flag =0;
 let demo = [];
 let vendor = [];
+let superVal = [];
 let tax = [];
+
 let rate_val
 class UserRatesMain extends Component {
   constructor(props) {
@@ -192,7 +194,9 @@ class UserRatesMain extends Component {
       .then(function(response){
         if(response.data.success){
           tax = response.data.data.QueryResponse;
-          tax = tax.Account;
+          console.log("TAX");
+          console.log(tax);
+          tax = tax.TaxCode;
           console.log("Tax");
           console.log(response.data.data);
           self.setState({suppliersList:response.data.data});
@@ -202,6 +206,29 @@ class UserRatesMain extends Component {
         self.setState({
           isLoading: false,
         });
+        console.log(error);
+      });
+      var url = Constants.BASE_URL + "employee/getSuperQBO";
+    var self = this;
+    var payload = {
+      token: localStorage.getItem("token"),
+    };
+    axios
+      .post(url,payload)
+      .then(function(response){
+        if(response.data.success){
+          superVal = response.data.data.QueryResponse;
+          superVal = superVal.Account;
+          console.log("Super");
+          console.log(superVal[0].FullyQualifiedName);
+          // self.setState({suppliersList:response.data.data});
+        }
+      })
+      .catch(function(error){
+        self.setState({
+          isLoading: false,
+        });
+        console.log("Super didnt work");
         console.log(error);
       });
   }
@@ -656,13 +683,26 @@ class UserRatesMain extends Component {
                         )
                       : ""} */}
                       {/* {console} */}
-                      {
+                      {/* {
                         tax
                         ? tax.map((sup, index) =>
                             
                               <React.Fragment>
                                 <option value={sup.FullyQualifiedName} key={`emp${index}`}>
                                   {sup.FullyQualifiedName}
+                                </option>
+                              </React.Fragment>
+                            
+                          )
+                        : ""
+                      } */}
+                       {
+                        tax
+                        ? tax.map((sup, index) =>
+                            
+                              <React.Fragment>
+                                <option value={sup.Name} key={`emp${index}`}>
+                                  {sup.Name}
                                 </option>
                               </React.Fragment>
                             
@@ -732,12 +772,30 @@ class UserRatesMain extends Component {
                     className="form-control input-group input-group-alternative"
                     name="supplier_superbase"
                     id="supplier_superbase"
-                    value="Superannuation"
+                    value={this.state.value}
                     onChange={(e) => this.handleDropdown(e, "superBaseAccount")}
                     required={this.state.superAnnuationRequired}
                   >
-                    <option value="Superannuation">Superannuation</option>
-                    {this.state.superBaseAccount="Superannuation"}
+                    {console.log("SUpppper")}
+                    {console.log(superVal[0].Name)}
+                    <option value={this.state.value}></option>
+                    {
+                        superVal
+                        
+                        ? superVal.map((sup, index) =>
+                            
+                              <React.Fragment>
+                                <option value={sup.Name}>
+                                  {String(sup.Name)}
+                                  {console.log(sup.Name)}
+                                </option>
+                              </React.Fragment>
+                            
+                          )
+                        : ""
+                      }
+                    
+                    {this.state.superBaseAccount=this.state.value}
                     {/* {this.state.accountList
                       ? this.state.accountList.map((account, index) =>
                           account["Id"] ? (
@@ -769,14 +827,28 @@ class UserRatesMain extends Component {
                     className="form-control input-group input-group-alternative"
                     name="supplier_superPayable"
                     id="supplier_superPayable"
-                    value="Accounts Payable (A/P)"
+                    value={this.state.value}
                     onChange={(e) =>
                       this.handleDropdown(e, "superPayableAccount")
                     }
                     required={this.state.superAnnuationRequired}
                   >
-                    <option value="Accounts Payable (A/P)">Accounts Payable (A/P)</option>
-                    {this.state.superPayableAccount="Accounts Payable (A/P)"}
+                    <option value={this.state.value}></option>
+                    {
+                        superVal
+                        ? superVal.map((sup, index) =>
+                            
+                              <React.Fragment>
+                                <option value={sup.FullyQualifiedName} key={`emp${index}`}>
+                                  {sup.FullyQualifiedName}
+                                </option>
+                              </React.Fragment>
+                            
+                          )
+                        : ""
+                      }
+                    
+                    {this.state.superPayableAccount=this.state.value}
                     {/* {this.state.accountList
                       ? this.state.accountList.map((account, index) =>
                           account["Id"] ? (

@@ -28,6 +28,7 @@ import Select from 'react-select';
 
 const $ = window.$;
 var index_val = 0;
+var tasks = [];
 // var  description_val = "";
 const options = [
   { value: 'Hours', label: 'Hours' },
@@ -198,44 +199,42 @@ class MyTime extends Component {
   }
   
   getService = () => {
-    var url = Constants.BASE_URL + "task/list";
+    // var url = Constants.BASE_URL + "task/list";
+    // var self = this;
+    // var payload = {
+    //   token: localStorage.getItem("token"),
+    // };
+    // axios
+    //   .post(url,payload)
+    //   .then(function(response){
+    //     if(response.data.success){
+    //       console.log(response.data.data);
+    //       self.setState({taskList:response.data.data});
+    //     }
+    //   })
+    //   .catch(function(error){
+    //     self.setState({
+    //       isLoading: false,
+    //     });
+    //     console.log(error);
+    //   });
     var self = this;
+  
     var payload = {
       token: localStorage.getItem("token"),
     };
-    axios
-      .post(url,payload)
-      .then(function(response){
-        if(response.data.success){
-          console.log(response.data.data);
-          self.setState({taskList:response.data.data});
-        }
-      })
-      .catch(function(error){
-        self.setState({
-          isLoading: false,
-        });
-        console.log(error);
-      });
-  }
-  getClients = () => {
-    // this.setState({
-    //   clientId: "demo", 
-    // });
-    var self = this;
-
-    var payload = {
-      token: localStorage.getItem("token"),
-    };
-
-    var url = Constants.BASE_URL + "client/list";
+  
+    var url = Constants.BASE_URL + "class/listQBO";
     axios
       .post(url, payload)
       .then(function (response) {
+        console.log("ResClass");
+        console.log(response.data.data.QueryResponse.Class);
         if (response.data.success) {
           self.setState({
-            clientList: response.data.data,
+            taskList: response.data.data.QueryResponse.Class,
           });
+          tasks = response.data.data.QueryResponse.Class;
         }
       })
       .catch(function (error) {
@@ -244,7 +243,34 @@ class MyTime extends Component {
         });
         console.log(error);
       });
-  };
+  }
+  // getClients = () => {
+  //   // this.setState({
+  //   //   clientId: "demo", 
+  //   // });
+  //   var self = this;
+
+  //   var payload = {
+  //     token: localStorage.getItem("token"),
+  //   };
+
+  //   var url = Constants.BASE_URL + "client/list";
+  //   axios
+  //     .post(url, payload)
+  //     .then(function (response) {
+  //       if (response.data.success) {
+  //         self.setState({
+  //           clientList: response.data.data,
+  //         });
+  //       }
+  //     })
+  //     .catch(function (error) {
+  //       self.setState({
+  //         isLoading: false,
+  //       });
+  //       console.log(error);
+  //     });
+  // };
   getClients = () => {
     // this.setState({
     //   clientId: "demo", 
@@ -1550,7 +1576,7 @@ class MyTime extends Component {
                                   ))} */} 
                                   
                                   {this.state.clientList.map((clientsList, index) => {
-                                    return <option value={clientsList.CompanyName}>{clientsList.CompanyName}</option>;
+                                    return <option value={clientsList.CompanyName || clientsList.DisplayName}>{clientsList.CompanyName||clientsList.DisplayName}</option>;
                                   })}
                                 </select>
                               </div>
@@ -1587,7 +1613,7 @@ class MyTime extends Component {
                                       )
                                     : ""} */}
                                     <option value="default">Choose Service</option>
-                                    {this.state.taskList.map((tasksList, index) => {
+                                    {tasks.map((tasksList, index) => {
                                     return <option value={tasksList.FullyQualifiedName}>{tasksList.FullyQualifiedName}</option>;
                                   })}
                                 </select>
@@ -1915,7 +1941,7 @@ class MyTime extends Component {
                                       )
                                     : ""} */}
                                     <option value="default">Choose Service</option>
-                                    {this.state.taskList.map((tasksList, index) => {
+                                    {tasks.map((tasksList, index) => {
                                     return <option value={tasksList.FullyQualifiedName}>{tasksList.FullyQualifiedName}</option>;
                                   })}
                                 </select>

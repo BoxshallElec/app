@@ -82,10 +82,10 @@ class TimeSheetActions extends Component {
           flag = 1;
         }
       }
-      if(flag != 0){
-        apiData[i].superPercentage = 1;
-        apiData[i].hourlyRate = 1;
-      }
+      // if(flag != 0){
+      //   apiData[i].superPercentage = 1;
+      //   apiData[i].hourlyRate = 1;
+      // }
       apiData[i].totalAmount = parseInt(apiData[i].Hours)*parseInt(apiData[i].hourlyRate);
       apiData[i].totalSuper = parseInt(apiData[i].totalAmount)*parseInt(apiData[i].superPercentage)/100;
       apiData[i].finalDescription = apiData[i].StartTime + self.state.detailList[i].superBase + self.state.detailList[i].superPayable;
