@@ -30,6 +30,7 @@ import ListTasksMain from "./admin/lists/ListTasksMain";
 import ClassesListMain from "./admin/lists/ClassesListMain";
 import ExpenseListMain from "./admin/lists/ExpenseListMain";
 import VendorsMain from "./admin/lists/VendorsMain";
+import Accounts from "./admin/lists/Accounts";
 import TimesheetApprovalBody from "./timesheets/TimesheetApprovalBody";
 import TimesheetApprovalHeader from "./timesheets/TimeSheetApprovalHeader";
 
@@ -107,6 +108,11 @@ class SideNav extends Component {
       case "employees":
         return <Employees />;
         break;
+      case "list-other-items":
+        return <VendorsMain />;
+        break;
+      case "Accounts":
+        return <VendorsMain />;
     }
 
     this.props.setComponent(component, type, header);
@@ -435,10 +441,10 @@ class SideNav extends Component {
                         color="#ff922b"
                         className="mr-2"
                       />
-                      Add Customers
+                      Customers
                     </a>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <a
                       className={this.isActive("employees")}
                       onClick={(event) => {
@@ -458,7 +464,7 @@ class SideNav extends Component {
                       />
                       Add Employees
                     </a>
-                  </li>
+                  </li> */}
                   <li className="nav-item">
                     <a
                       className={this.isActive("suppliers")}
@@ -477,7 +483,7 @@ class SideNav extends Component {
                         color="#ff922b"
                         className="mr-2"
                       />
-                      Add Suppliers
+                      Suppliers
                     </a>
                   </li>
                   <li className="nav-item">
@@ -551,9 +557,9 @@ class SideNav extends Component {
                           </li>
                           <li className="nav-item">
                             <a
-                              className={this.isActive("list-other-items")}
+                              className={this.isActive("Accounts")}
                               onClick={(event) => {
-                                this.handleClick(event, "list-other-items");
+                                this.handleClick(event, "Accounts");
                               }}
                               href="/"
                             >

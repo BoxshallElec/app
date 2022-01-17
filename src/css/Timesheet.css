@@ -64,3 +64,32 @@ label{
 .dateInfo p{
     display: inline;
 }
+
+
+.display {
+    display: none;
+}
+
+
+
+.arrow {
+    width: 1em; 
+    height: 1em;
+    vertical-align: middle;
+    fill: currentColor;
+    overflow: hidden;
+}
+
+
+
+
+.row td {
+    padding: 8px 5px 8px 5px;
+}
+
+
+
+.unset-button {
+    all: unset;
+}
+

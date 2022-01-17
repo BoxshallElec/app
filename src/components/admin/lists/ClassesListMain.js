@@ -18,6 +18,7 @@ class ClassesListMain extends Component {
             allClassesList: [],
             classesList: [],
             classesDic: {},
+            classList : [],
             search: {
                 from: 0, size: 10,
                 status: ""
@@ -38,26 +39,15 @@ class ClassesListMain extends Component {
 
 
     getClassesList = async () => {
-        this.setState({ isLoading: true });
+        this.setState({ isLoading: false });
         let searchObj = { ...this.state.search }
         let result = await httpClient("class/list", "POST", searchObj);
         if (result.success) {
-            let classesDic = result.data.reduce((acc, ele) => {
-                acc[ele._id] = ele.class;
-                return acc
-            }, {})
-            let allClassesList = [...result.data];
-            let classesList = [...result.data];
-            if (this.state.search.status) {
-                classesList = classesList.filter(x => this.state.search.status === "active" ? x.Active === true : x.Active === false)
-            }
+            console.log(result);
             this.setState({
-                allClassesList: allClassesList,
-                classesList: classesList,
-                classesDic: classesDic,
-                hasMoreResults: result.data.length === this.state.search.size,
-                isLoading: false
-            });
+                classList : result.data.QueryResponse.Class,
+                isLoading : false,
+            })
         } else {
             this.setState({ isLoading: false })
             this.showToast("Error while getting my classes", "error")
@@ -227,7 +217,7 @@ class ClassesListMain extends Component {
                             </tr>
                         </thead>
                         <tbody>
-                            {this.state.classesList.map((classObj, index) => (
+                            {this.state.classList.map((classObj, index) => (
                                 <tr key={index}>
                                     <td>
                                         <span >
@@ -242,7 +232,7 @@ class ClassesListMain extends Component {
                                     </td>
                                 </tr>
                             ))}
-                            {this.state.classesList.length === 0 && (
+                            {this.state.classList.length === 0 && (
                                 <tr>
                                     <td colSpan="4" className="text-center">No classes found</td>
                                 </tr>

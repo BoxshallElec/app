@@ -199,6 +199,8 @@ class AdminTimesheetsMain extends Component {
           changeStatusTimesheets={this.changeStatusTimesheets}
           timesheetData={this.state.timesheets.data}
         ></TimesheetApprovalActions>
+        {console.log("SelectedStatusApp")}
+        {console.log(this.state.selectedApprovalStatus)}
         <TimesheetsTable
           selectedStatus={this.state.selectedApprovalStatus}
           timesheetData={this.state.timesheets.data}

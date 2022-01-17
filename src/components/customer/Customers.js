@@ -45,8 +45,10 @@ class Customers extends Component {
     });
 
     if (result.success) {
+      console.log("Customer");
+      console.log(result);
       self.setState({
-        customers: result.data,
+        customers: result.data.QueryResponse.Customer,
         isLoading: false,
         totalCount: Math.ceil(result.totalCount / 10),
       });

@@ -28,7 +28,6 @@
     "react-chartjs-2": "^2.7.6",
     "react-datepicker": "^2.8.0",
     "react-dom": "^16.11.0",
-    "react-export-excel": "^0.5.3",
     "react-full-screen": "^0.3.1",
     "react-html5-camera-photo": "^1.5.4",
     "react-images": "^1.0.0",
@@ -41,6 +40,7 @@
     "react-spinners": "^0.5.8",
     "react-switch": "^5.0.1",
     "react-toasts": "^3.0.6",
+    "react-week-picker": "^1.1.4",
     "virtual-select-plugin": "^1.0.19"
   },
   "scripts": {

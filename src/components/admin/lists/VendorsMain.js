@@ -37,33 +37,26 @@ class VendorsMain extends Component {
 
 
     getVendorsList = async () => {
-        this.setState({ isLoading: true });
-        let searchObj = { ...this.state.search }
-        let result = await httpClient("vendor/list", "POST", searchObj);
-        if (result.success) {
-            let allVendorsList = [...result.data];
-            let vendorsList = [...result.data].map(x => {
-                if (x.PrimaryPhone && x.PrimaryPhone.FreeFormNumber) {
-                    x.FreeFormNumber = x.PrimaryPhone.FreeFormNumber
-                }
-                if (x.PrimaryEmailAddr && x.PrimaryEmailAddr.Address) {
-                    x.PrimaryEmailAddr = x.PrimaryEmailAddr.Address
-                }
-                if (x.WebAddr && x.WebAddr.URI) {
-                    x.WebAddr = x.WebAddr.URI
-                }
-                return x
-            });
-            this.setState({
-                allVendorsList: allVendorsList,
-                vendorsList: vendorsList,
-                hasMoreResults: result.data.length === this.state.search.size,
-                isLoading: false
-            });
-        } else {
-            this.setState({ isLoading: false })
-            this.showToast("Error while getting vendors list", "error")
-        }
+        var self = this;
+    const from = 0;
+
+    this.setState({ isLoading: true });
+    let result = await httpClient("vendor/list", "POST", {
+      from: from,
+    });
+
+    if (result.success) {
+      console.log("Vendor");
+      console.log(result);
+      self.setState({
+        vendorsList: result.data.QueryResponse.Vendor,
+        isLoading: false,
+        totalCount: Math.ceil(result.totalCount / 10),
+      });
+    } else {
+      this.setState({ isLoading: false });
+      this.showToast("Error while getting customers", "error");
+    }
     }
 
     getVendorListFrom = (from) => {

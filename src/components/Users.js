@@ -405,7 +405,7 @@ class Users extends Component {
             aria-hidden="true"
           >
             <div
-              className="modal-dialog modal- modal-dialog-centered modal-lg full-page-dialog"
+              className="modal-dialog modal- modal-dialog-centered modal-lg"
               role="document"
             >
               <div className="modal-content">

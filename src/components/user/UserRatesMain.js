@@ -25,6 +25,7 @@ class UserRatesMain extends Component {
         data: undefined,
         editIndex: -1,
       },
+      selectedEmployeeData: [],
       employeeList: [],
       suppliersList: [],
       accountList: [],
@@ -51,6 +52,7 @@ class UserRatesMain extends Component {
   }
   componentDidMount() {
     this.getValues();
+    this.getSelectedEmployee();
     var self = this;
     var payLoad = {
       token: localStorage.getItem("token"),
@@ -141,6 +143,30 @@ class UserRatesMain extends Component {
     //     console.log(error);
     //     this.props.showToast(error.message, "error");
     //   });
+  }
+  getSelectedEmployee = () =>{
+    var url = Constants.BASE_URL + "employee/getlinkedEmployee";
+    var self = this;
+    var payload = {
+      token: localStorage.getItem("token"),
+      selectedId: this.props.employeeId
+    };
+    axios
+      .post(url,payload)
+      .then(function(response){
+        if(response.data.success){
+          // selectedEmployeeData = response.data.data.QueryResponse.Employee;
+          console.log("Selected Employee");
+          console.log(response.data.data);
+          self.setState({selectedEmployeeData:response.data.data});
+        }
+      })
+      .catch(function(error){
+        self.setState({
+          isLoading: false,
+        });
+        console.log(error);
+      });
   }
   getValues = () => {
     var url = Constants.BASE_URL + "employee/getAllEmployeesQBO";
@@ -407,6 +433,7 @@ class UserRatesMain extends Component {
 
   render() {
     return (
+      
       <section className="container-fluid">
         <hr className="my-4" />
         <h6 className="heading-small text-muted mb-4">Link Employee</h6>
@@ -443,6 +470,14 @@ class UserRatesMain extends Component {
                    }
                    {/* {console.log(demo)} */}
                   </select>
+                  {this.state.selectedEmployeeData.mongoid ?
+                  <div><h3>Previous Linked Employee: {this.state.selectedEmployeeData.mongoid || "Null"}</h3><br></br></div>
+                  :
+                  <div></div>
+                  }
+                  
+                  {console.log("PROPS ARE")}
+                  {console.log(this.props)}
                 </div>
                 : ""}
               </div>
@@ -471,8 +506,14 @@ class UserRatesMain extends Component {
             </div>
           </div>
           <div className="row">
+          {this.state.selectedEmployeeData.rate ?
+          <div><h3>Previous Hourly rate: {this.state.selectedEmployeeData.rate || "Null"}</h3><br></br></div>
+          :
+          <div></div>
+  }
             <div className="col col-lg-6 col-md-6 col-sm-12 col-xs-12">
               <div className="d-flex justify-content-between">
+               
                 <h5>Cost Rate/Hr</h5>
                 <button
                   onClick={() => this.handleOpenCostRateDialog(true)}
@@ -593,9 +634,14 @@ class UserRatesMain extends Component {
             </div>
             <div className="row">
               <div className="form-group">
+              
                 <label className="form-control-label" for="hourlyRateSupplier">
                   Hourly Rate
                 </label>
+                {this.state.selectedEmployeeData.rate ?
+                <div><h3>Previous Hourly rate: {this.state.selectedEmployeeData.rate || "Null"}</h3><br></br></div>
+              :<div></div>}
+                
                 <input
                   type="number"
                   id="hourlyRateSupplier"
@@ -658,6 +704,10 @@ class UserRatesMain extends Component {
                   <label className="form-control-label" htmlFor="gst_type">
                     Select tax type
                   </label>
+                  {this.state.selectedEmployeeData.taxType ?
+                  <div><h3>Previous Tax Type: {this.state.selectedEmployeeData.taxType || "Null"}</h3><br></br></div>
+                :<div></div>}
+                  
                   <select
                     className="form-control input-group input-group-alternative"
                     name="gst_type"
@@ -734,6 +784,7 @@ class UserRatesMain extends Component {
                   >
                     Superanuation
                   </label>
+                  
                 </div>
               </div>
             </div>
@@ -747,6 +798,10 @@ class UserRatesMain extends Component {
                 >
                   Superannuation Percentage (%)
                 </label>
+                {this.state.selectedEmployeeData.superPercentage ?
+                <div><h3>Previous %: {this.state.selectedEmployeeData.superPercentage || "Null"}</h3><br></br></div>
+              :<div></div>}
+                
                 <input
                   type="number"
                   id="superAnuationPercentage"
@@ -768,26 +823,28 @@ class UserRatesMain extends Component {
                   >
                     Superannuation Account
                   </label>
+                  {this.state.selectedEmployeeData.superBase ?
+                  <div><h3>Previous Superannuation: {this.state.selectedEmployeeData.superBase || "Null"}</h3><br></br></div>
+                :<div></div>}
+                  
                   <select
                     className="form-control input-group input-group-alternative"
-                    name="supplier_superbase"
-                    id="supplier_superbase"
+                    name="supplier_superPayable"
+                    id="supplier_superPayable"
                     value={this.state.value}
-                    onChange={(e) => this.handleDropdown(e, "superBaseAccount")}
+                    onChange={(e) =>
+                      this.handleDropdown(e, "superPayableAccount")
+                    }
                     required={this.state.superAnnuationRequired}
                   >
-                    {console.log("SUpppper")}
-                    {console.log(superVal[0].Name)}
                     <option value={this.state.value}></option>
                     {
                         superVal
-                        
                         ? superVal.map((sup, index) =>
                             
                               <React.Fragment>
-                                <option value={sup.Name}>
-                                  {String(sup.Name)}
-                                  {console.log(sup.Name)}
+                                <option value={sup.FullyQualifiedName} key={`emp${index}`}>
+                                  {sup.FullyQualifiedName}
                                 </option>
                               </React.Fragment>
                             
@@ -795,7 +852,7 @@ class UserRatesMain extends Component {
                         : ""
                       }
                     
-                    {this.state.superBaseAccount=this.state.value}
+                    {this.state.superPayableAccount=this.state.value}
                     {/* {this.state.accountList
                       ? this.state.accountList.map((account, index) =>
                           account["Id"] ? (
@@ -823,6 +880,11 @@ class UserRatesMain extends Component {
                   >
                     Superannuation Payable Account
                   </label>
+                  {this.state.selectedEmployeeData.superPayable ? 
+                  <div><h3>Previous super payable: {this.state.selectedEmployeeData.superPayable || "Null"}</h3><br></br></div>
+                  :
+                  <div></div>
+                  }
                   <select
                     className="form-control input-group input-group-alternative"
                     name="supplier_superPayable"

@@ -30,6 +30,9 @@ const $ = window.$;
 var index_val = 0;
 var tasks = [];
 // var  description_val = "";
+const selectWidth = {
+  width:'50%'
+};
 const options = [
   { value: 'Hours', label: 'Hours' },
   { value: 'BillableStatus', label: 'BillableStatus' },
@@ -1425,7 +1428,7 @@ class MyTime extends Component {
                   <input type="submit"></input>
                 </form> */}
                 {/* <form onSubmit={this.chooseColumn}> */}
-                  <Select options={options} isMulti id="tableList" onChange={this.chooseColumn}/>
+                  <Select options={options} isMulti id="tableList" onChange={this.chooseColumn} styles={selectWidth}/>
                   {/* <input type="submit"></input>
                 </form> */}
               </td>
