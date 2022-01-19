@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { useState } from 'react';
 import "./admin-timesheets.css";
 import "../../../css/Employees.css";
 import "../../../css/Timesheet.css"
@@ -9,21 +10,100 @@ import ImgsViewer from "react-images-viewer";
 import { getTimesheetStatus } from "../../../UtilService";
 import axios from "axios";
 import { setDefaultLocale } from "react-datepicker";
-import {Accordion} from 'react-bootstrap';
+import {Accordion, Row} from 'react-bootstrap';
 import Select from 'react-select';
 import { MDBTable, MDBTableBody, MDBTableHead } from 'mdbreact';
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { WeeklyCalendar } from 'react-week-picker';
+import Paper from '@material-ui/core/Paper';
+import { GroupingState, IntegratedGrouping } from "@devexpress/dx-react-grid";
+import { EditingState } from '@devexpress/dx-react-grid';
+import {
+  SearchState,
+  IntegratedFiltering,
+} from '@devexpress/dx-react-grid';
+import {
+  SortingState,
+  IntegratedSorting,
+} from '@devexpress/dx-react-grid';
+import { SelectionState, IntegratedSelection, } from '@devexpress/dx-react-grid';
+import {
+  PagingState,
+  IntegratedPaging,
+} from '@devexpress/dx-react-grid';
+import {
+  Grid,
+  Table,
+  TableHeaderRow,
+  SearchPanel,
+  DragDropProvider,
+  GroupingPanel,
+  TableGroupRow,
+  TableColumnReordering,
+  TableColumnResizing,
+  ColumnChooser,
+  TableColumnVisibility,
+  TableSelection,
+  TableEditRow,
+  TableEditColumn,
+  PagingPanel, 
+  Toolbar
+} from "@devexpress/dx-react-grid-material-ui";
+
 // import '../../../../node_modules/react-week-picker/src/lib/calendar.css';
 const options = [
   { value: 'Employees', label: 'Employees' },
   { value: 'Date', label: 'Date' },
   ]
+
+  // const [columns] = [
+  //   { name: 'HOURS', title: 'HOURS' },
+  //   { name: 'TASKS', title: 'TASKS' },
+  //   { name: 'BILLABLE STATUS', title: 'BILLABLE STATUS' },
+  //   { name: 'DATE UPDATED', title: 'DATE UPDATED' },
+  //   { name: 'CLIENT', title: 'CLIENT' },
+  // ];
+  // let [rows] = [];
+  // const [defaultColumnWidths] = [
+  //   { columnName: 'HOURS', width: 180 },
+  //   { columnName: 'TASKS', width: 180 },
+  //   { columnName: 'BILLABLE STATUs', width: 180 },
+  //   { columnName: 'DATE UPDATED', width: 240 },
+  //   { columnName: 'CLIENT', width: 240 },
+  // ];
+  
 class TimesheetsTable extends Component {
     constructor(props) {
       super(props);
       this.state = {
+        
+        defaultColumnWidths : [
+          { columnName: 'id', width: 180 },
+          { columnName: 'CLIENT', width: 180 },
+          { columnName: 'TASKS', width: 180 },
+          { columnName: 'BILLABLE_STATUS', width: 180 },
+          { columnName: 'DATE_UPDATED', width: 240 },
+          { columnName: 'HOURS', width: 180}
+        ],
+        defaultHiddenColumnNames :['id','TASKS'],
+        tableColumnExtensions: [{ columnName: 'CLIENT', width: 180 }],
+        columns: [
+          { name: "id", title: "id" },
+          { name: "CLIENT", title: "CLIENT" },
+          { name: "TASKS", title: "TASKS" },
+          { name: "BILLABLE_STATUS", title: "BILLABLE_STATUS" },
+          { name: "DATE_UPDATED", title: "DATE_UPDATED" },
+          { name: "HOURS", title: "HOURS"}
+        ],
+        selection: [], 
+        setSelection: [],
+        rows:[],
+        
+        getRowId :[],
+        sorting : [{ columnName: 'CLIENT', direction: 'asc' }],
+        setSorting :[{ columnName: 'CLIENT', direction: 'asc' }],
+        grouping: [{ columnName: "CLIENT" }],
         isToggle:true,
         clientList:[],
         employeeList:[],
@@ -151,6 +231,21 @@ class TimesheetsTable extends Component {
               self.setState({
                   timesheet:response.data.data,
               });
+              
+              let row_demo = [];
+              let row_id = [];
+              for(let i =0;i<self.state.timesheet.length;i++){
+                row_demo[i] = { id:i,CLIENT: self.state.timesheet[i].CustomerRef.value, TASKS: self.state.timesheet[i].ItemRef.value, BILLABLE_STATUS: self.state.timesheet[i].BillableStatus, DATE_UPDATED: self.state.timesheet[i].StartTime, HOURS:self.state.timesheet[i].Hours };
+                row_id[i] = i;
+              }
+              // getRowId = row_demo => row_demo.id;
+              console.log("ROW demo");
+              console.log(row_demo[0].id);
+              self.setState({
+                rows:row_demo,
+                getRowId:row_id
+              });
+              console.log(row_demo);
           }
       })
       .catch(function(error){
@@ -576,7 +671,39 @@ class TimesheetsTable extends Component {
     });
       
     }
+
+    commitChanges = (event) => {
+      var self = this;
+      console.log(event);
+      let changedRows;
+      if (event.added) {
+        const startingAddedId = self.state.rows.length > 0 ? self.state.rows[self.state.rows.length - 1].id + 1 : 0;
+        changedRows = [
+          ...self.state.rows,
+          ...event.added.map((row, index) => ({
+            id: startingAddedId + index,
+            ...row,
+          })),
+        ];
+      }
+      if (event.changed) {
+        changedRows = self.state.rows.map(row => (event.changed[row.id] ? { ...row, ...event.changed[row.id] } : row));
+      }
+      if (event.deleted) {
+        const deletedSet = new Set(event.deleted);
+        changedRows = self.state.rows.filter(row => !deletedSet.has(row.id));
+      }
+      console.log("Changed row");
+      console.log(changedRows);
+      self.setState({
+        rows:changedRows
+      });
+      // setRows(changedRows);
+    }
+
     render(){
+      const { rows,  columns, getRowId, grouping, defaultColumnWidths, setSorting, sorting, defaultHiddenColumnNames, setSelection, selection, tableColumnExtensions  } = this.state;
+
         return (
           
           <div> 
@@ -657,99 +784,8 @@ class TimesheetsTable extends Component {
             
             {this.state.select_val=='Date' ?
              (
-              //  <Accordion id ="accordian">
-              //     {this.state.tsheetstatus.map((employees,index) => (
-              //       <Accordion.Item eventKey={index}>
-              //       </Accordian.Item>
-              //     ))}
-              //  </Accordion>
               
-               <Accordion id ="accordian">
-                  {console.log(this.state.dayaccord)}
-                  {this.state.dayaccord.map((day,index) => (
-                    <Accordion.Item eventKey={index}>
-                      <Accordion.Header onClick={(e) => this.getTimesheetfromTime(e,day)} >
-                        <input type="checkbox" id={"namecheck"+index} className={"namecheck"+index} onClick={(e) =>this.checkAll(e,index)}></input> 
-                        {/* onChange={(e) => this.checkAll(e,index)}  */}
-                          &nbsp;&nbsp;{new Date(day).toLocaleDateString('en-GB',{day: 'numeric', month: 'short', year: 'numeric'})}
-                      </Accordion.Header>
-                      {this.state.tsdate.map((dateentry,ind) => (
-                        // <Accordion.Item eventKey={ind}>
-                        <Accordion.Body>
-                          <Accordion>
-                            <Accordion.Item eventKey={ind}> 
-                              <Accordion.Header>
-                                {dateentry.EmployeeRef.value}
-                              </Accordion.Header>
-                              
-                              <Accordion.Body>
-                              {/* {console.log("DEEEEMOOOTSS")} */}
-                              <MDBTable autoWidth>
-                                <thead>
-                                  <tr>
-                                    
-                                  {/* {console.log("insidecheck"+index)} */}
-                                    <th><input type="checkbox" id={"ind"+"insidecheck"+ind} class={"ind"+"insidecheck"+ind} name={"ind"+"insidecheck"+ind} value="head" onChange={(e) => this.addChecked(e,index)}></input>&nbsp;&nbsp;CLIENT</th>
-                                   
-                                  {/* </tr>
-                                  <tr> */}
-                                    <th>HOURS</th>
-                                  {/* </tr>
-                                  <tr> */}
-                                    <th>TASKS</th>
-                                  {/* </tr>
-                                  <tr> */}
-                                    <th>BILLABLE STATUS</th>
-                                  {/* </tr>
-                                  <tr> */}
-                                    <th>DATE UPDATED</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr>
-                                    <td>{dateentry.CustomerRef.value}</td>
-                                  {/* </tr> */}
-                                  {/* <tr> */}
-                                    <td>{dateentry.Hours}</td>
-                                  {/* </tr>
-                                  <tr>
-                                     */}
-                                    <td>{dateentry.ItemRef.value}</td>
-                                  {/* </tr>
-                                  <tr>
-                                     */}
-                                    <td>{dateentry.BillableStatus}</td>
-                                  {/* </tr>
-                                  <tr> */}
-                                    
-                                    <td>{dateentry.StartTime}</td>
-                                  </tr>
-                                </tbody>
-                              
-                              </MDBTable>
-                              </Accordion.Body>
-                            </Accordion.Item>
-                          </Accordion>
-                          
-
-                      </Accordion.Body>
-                      // </Accordion.Item>
-                        // <Accordion activeKey={ind}>
-                        //   <Accordion.Item eventKey={ind}> 
-                        //     <Accordion.Header>
-                        //       Demo
-                        //     </Accordion.Header>
-                        //     <Accordion.Body>
-                        //       Ahhan
-                        //     </Accordion.Body>
-                        //   </Accordion.Item>
-                        // </Accordion>
-                       ))}
-                    
-                  </Accordion.Item>
-                  ))}
-                  
-                </Accordion> 
+              <div></div>
              )
              :(
                <Accordion id ="accordian">
@@ -760,65 +796,91 @@ class TimesheetsTable extends Component {
                           &nbsp;&nbsp;{employees.DisplayName}
                       </Accordion.Header>
                       <Accordion.Body>
-                      <MDBTable autoWidth>
+                      {/* <MDBTable autoWidth>
                                 <thead>
                                   <tr>
                                     <th><input type="checkbox" id={"insidecheck"+index} class={"insidecheck"+index} name={"insidecheck"+index} value="head"></input>&nbsp;&nbsp;CLIENT</th>
-                                  {/* </tr>
-                                  <tr> */}
-                                    
-                                  {/* </tr>
-                                  <tr> */}
+                                  
                                     <th>TASKS</th>
-                                  {/* </tr>
-                                  <tr> */}
+                                  
                                     <th>BILLABLE STATUS</th>
-                                  {/* </tr>
-                                  <tr> */}
+                                  
                                     <th>DATE UPDATED</th>
                                     <th>HOURS</th>
                                   </tr>
                                 </thead>
-                                </MDBTable>
-                      {this.state.timesheet.map((employeetime,ind) => (
-                        // <Accordion.Body>
-                          <MDBTable autoWidth responsive>
-                                <tbody>
-                                  <tr>
-                                    <td>{employeetime.CustomerRef.value}</td>
-                                  {/* </tr> */}
-                                  {/* <tr> */}
-                                    
-                                  {/* </tr>
-                                  <tr>
-                                     */}
-                                    <td>{employeetime.ItemRef.value}</td>
-                                  {/* </tr>
-                                  <tr>
-                                     */}
-                                    <td>{employeetime.BillableStatus}</td>
-                                  {/* </tr>
-                                  <tr> */}
-                                    
-                                    <td>{employeetime.StartTime}</td>
-                                    <td>{employeetime.Hours}</td>
-                                  </tr>
-                                </tbody>
-                              
-                              </MDBTable>
+                                </MDBTable> */}
+                           
+                        {/* {console.log("ROWS")}
+                        {console.log(rows)} */}
+                        <Paper>
+                        <Grid rows={rows} columns={columns} >
+                        <SelectionState
+                            // selection={selection}
+                            // onSelectionChange={setSelection}
+                          />
+                        <PagingState
+                          defaultCurrentPage={0}
+                          pageSize={5}
+                        />
+                        <IntegratedPaging />
+                        <SortingState
+                          defaultSorting={[{ columnName: 'CLIENT', direction: 'asc' }]}
+                        />
+                        <IntegratedSorting />
+                        <IntegratedSelection />
+                        <EditingState
+                           onCommitChanges={(e) => {this.commitChanges(e)}}
+                          />
+                          <SearchState  />
+                          <IntegratedFiltering />
+                          <DragDropProvider />
+                          <Table columnExtensions={tableColumnExtensions}/>
+                          <TableColumnReordering
+                            defaultOrder={['CLIENT', 'TASKS', 'BILLABLE_STATUS', 'DATE_UPDATED','HOURS','id']}
+                          />
+                          <TableColumnResizing defaultColumnWidths={defaultColumnWidths}/>
+                          <TableHeaderRow showSortingControls />
+                          <TableSelection showSelectAll/>
+                          <TableColumnVisibility
+                            defaultHiddenColumnNames={defaultHiddenColumnNames}
+                          />
+                          <TableEditRow />
+                          <TableEditColumn
+                            showAddCommand
+                            showEditCommand
+                            // showDeleteCommand
+                          />
+                          <Toolbar />
+                          <ColumnChooser />
+                          <PagingPanel />
+                          
+                          <SearchPanel />
+                        </Grid>
+                      </Paper> 
+                        
+                         
                         
 
                      
-                      ))}
+                 
+                      
                      </Accordion.Body>
                   </Accordion.Item>
                   ))}
                   
                 </Accordion> 
              )}
-                     
+                   
           </div>
         );
     }
 }
 export default TimesheetsTable;
+// rows = [
+                        //   {'HOURS' : employeetime.Hours},
+                        //   {'TASKS' : employeetime.ItemRef.value},
+                        //   {'BILLABLE STATUS' : employeetime.BillableStatus},
+                        //   {'DATE UPDATED' : employeetime.StartTime},
+                        //   {'CLIENT' : employeetime.CustomerRef.value}
+                        // ]

@@ -25,6 +25,42 @@ import { MDBDataTable, MDBInput } from "mdbreact";
 import { MDBTable, MDBTableBody, MDBTableHead } from 'mdbreact';
 import { MDBDataTableV5 } from 'mdbreact';
 import Select from 'react-select';
+import Paper from '@material-ui/core/Paper';
+import {
+  SearchState,
+  IntegratedFiltering,
+} from '@devexpress/dx-react-grid';
+import { GroupingState, IntegratedGrouping } from "@devexpress/dx-react-grid";
+import { EditingState } from '@devexpress/dx-react-grid';
+import {
+  SortingState,
+  IntegratedSorting,
+} from '@devexpress/dx-react-grid';
+import { SelectionState, IntegratedSelection, } from '@devexpress/dx-react-grid';
+import {
+  PagingState,
+  IntegratedPaging,
+} from '@devexpress/dx-react-grid';
+import {
+  Grid,
+  Table,
+  TableHeaderRow,
+  SearchPanel,
+  GroupingPanel,
+  TableGroupRow,
+  TableColumnResizing,
+  ColumnChooser,
+  TableColumnVisibility,
+ 
+  TableSelection,
+  TableEditRow,
+  TableEditColumn,
+  PagingPanel, 
+  DragDropProvider,
+  TableColumnReordering,
+  Toolbar
+} from "@devexpress/dx-react-grid-material-ui";
+
 
 const $ = window.$;
 var index_val = 0;
@@ -45,6 +81,32 @@ class MyTime extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      defaultColumnWidths : [
+        { columnName: 'id', width: 180 },
+        { columnName: 'BillableStatus', width: 180 },
+        { columnName: 'CustomerRef', width: 180 },
+        { columnName: 'StartTime', width: 180 },
+        { columnName: 'Hours', width: 240 },
+        { columnName: 'Description', width: 180}
+      ],
+      defaultHiddenColumnNames :['BillableStatus','id'],
+      tableColumnExtensions: [{ columnName: 'CustomerRef', width: 180 }],
+      columns: [
+        { name: "id", title: "id" },
+        { name: "BillableStatus", title: "BillableStatus" },
+        { name: "CustomerRef", title: "CustomerRef" },
+        { name: "StartTime", title: "StartTime" },
+        { name: "Hours", title: "Hours" },
+        { name: "Description", title: "Description"}
+      ],
+      selection: [], 
+      setSelection: [],
+      rows:[],
+      
+      getRowId :[],
+      sorting : [{ columnName: 'CustomerRef', direction: 'asc' }],
+      setSorting :[{ columnName: 'CustomerRef', direction: 'asc' }],
+      grouping: [{ columnName: "CustomerRef" }],
       StartTime: new Date(new Date().toDateString()),
       Hours: "",
       taskId: "",
@@ -416,12 +478,33 @@ class MyTime extends Component {
               
           }
           
+         
           self.setState({
             
             timesheetss:timesheetssCopy,
             isLoading: false,
             totalCount: Math.ceil(response.data.totalCount / 10),
-          });          
+            // rows:row_demo,
+            // getRowId:row_id
+          });   
+          console.log("AFTER set state");
+          let row_demo = [];
+          let row_id = [];
+          console.log("TIMSLENGTH");
+          console.log(self.state.timesheetss.rows[0]);
+          for(let i =0;i<self.state.timesheetss.rows.length;i++){
+            console.log(i);
+            row_demo[i] = { id:i,BillableStatus:self.state.timesheetss.rows[i].BillableStatus,CustomerRef: self.state.timesheetss.rows[i].CustomerRef, StartTime: self.state.timesheetss.rows[i].StartTime, Hours:self.state.timesheetss.rows[i].Hours, Description: self.state.timesheetss.rows[i].ItemRef};
+            row_id[i] = i;
+          }
+          // // // getRowId = row_demo => row_demo.id;
+          console.log("ROW demo");
+          console.log(row_demo);
+          self.setState({
+            rows:row_demo,
+            getRowId:row_id
+          });
+          // console.log(row_demo);       
           console.log(self.state.timesheetss);
           
         }
@@ -1370,9 +1453,36 @@ class MyTime extends Component {
         self.setState({ loading: false });
       });
   };
-  
+  commitChanges = (event) => {
+    var self = this;
+    console.log(event);
+    let changedRows;
+    if (event.added) {
+      const startingAddedId = self.state.rows.length > 0 ? self.state.rows[self.state.rows.length - 1].id + 1 : 0;
+      changedRows = [
+        ...self.state.rows,
+        ...event.added.map((row, index) => ({
+          id: startingAddedId + index,
+          ...row,
+        })),
+      ];
+    }
+    if (event.changed) {
+      changedRows = self.state.rows.map(row => (event.changed[row.id] ? { ...row, ...event.changed[row.id] } : row));
+    }
+    if (event.deleted) {
+      const deletedSet = new Set(event.deleted);
+      changedRows = self.state.rows.filter(row => !deletedSet.has(row.id));
+    }
+    console.log("Changed row");
+    console.log(changedRows);
+    self.setState({
+      rows:changedRows
+    });
+    // setRows(changedRows);
+  }
   render() {
-    
+    const { rows,  columns, getRowId, grouping, defaultColumnWidths, setSorting, sorting, defaultHiddenColumnNames, setSelection, selection, tableColumnExtensions } = this.state;
     return this.state.isLoading ? (
       <div className="centered">
         <ReactLoading
@@ -1383,7 +1493,55 @@ class MyTime extends Component {
         />
       </div>
     ) : (
+      
       <React.Fragment>
+        {console.log("ROWSTSS")}
+        {console.log(this.state.timesheetss.columns)}
+        <Paper>
+                        <Grid rows={rows} columns={columns} >
+                        <SelectionState
+                            // selection={selection}
+                            // onSelectionChange={setSelection}
+                          />
+                        <PagingState
+                          defaultCurrentPage={0}
+                          pageSize={5}
+                        />
+                        <IntegratedPaging />
+                        <SortingState
+                          defaultSorting={[{ columnName: 'CustomerRef', direction: 'asc' }]}
+                        />
+                        <IntegratedSorting />
+                        <IntegratedSelection />
+                        <EditingState
+                           onCommitChanges={(e) => {this.commitChanges(e)}}
+                          />
+                          <SearchState  />
+                          <IntegratedFiltering />
+                          <DragDropProvider />
+                          <Table columnExtensions={tableColumnExtensions}/>
+                          <TableColumnReordering
+                            defaultOrder={['CustomerRef', 'StartTime', 'Hours', 'Description','BillableStatus','id']}
+                          />
+                          <TableColumnResizing defaultColumnWidths={defaultColumnWidths}/>
+                          <TableHeaderRow showSortingControls />
+                          <TableSelection showSelectAll/>
+                          <TableColumnVisibility
+                            defaultHiddenColumnNames={defaultHiddenColumnNames}
+                          />
+                          <TableEditRow />
+                          <TableEditColumn
+                            showAddCommand
+                            showEditCommand
+                            // showDeleteCommand
+                          />
+                          <Toolbar />
+                          <ColumnChooser />
+                          <PagingPanel />
+                          <SearchPanel />
+                          
+                        </Grid>
+                      </Paper> 
         <ToastsContainer
           store={ToastsStore}
           position={ToastsContainerPosition.TOP_RIGHT}
@@ -1428,7 +1586,7 @@ class MyTime extends Component {
                   <input type="submit"></input>
                 </form> */}
                 {/* <form onSubmit={this.chooseColumn}> */}
-                  <Select options={options} isMulti id="tableList" onChange={this.chooseColumn} styles={selectWidth}/>
+                  {/* <Select options={options} isMulti id="tableList" onChange={this.chooseColumn} styles={selectWidth}/> */}
                   {/* <input type="submit"></input>
                 </form> */}
               </td>
@@ -2117,7 +2275,7 @@ class MyTime extends Component {
         /> */}
         {/* Edit option based on status */}
         {console.log(this.state.timesheets)}
-        <MDBDataTableV5 sortable autoWidth hover responsive checkboxFirstColumn={false} bordered data={this.state.timesheetss} fullPagination/>
+        {/* <MDBDataTableV5 sortable autoWidth hover responsive checkboxFirstColumn={false} bordered data={this.state.timesheetss} fullPagination/> */}
         
         <button
               // className="dropdown-item"
