@@ -23,7 +23,7 @@ class Nav extends Component {
         id="navbar-main"
       >
         <div className="container-fluid">
-        <button type="button"><i class="fas fa-bars"></i></button>
+        
           <a
             className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
             href="/"

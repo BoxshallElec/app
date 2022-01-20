@@ -132,10 +132,12 @@ class SideNav extends Component {
     console.log(this.state); 
     console.log(this.state.accessLevels.indexOf("TIMESHEETS"));
     return (
+      
       <nav
         className="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white"
         id="sidenav-main"
       >
+        
         <div className="container-fluid">
           <button
             className="navbar-toggler"

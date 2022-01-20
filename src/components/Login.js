@@ -60,6 +60,9 @@ class Login extends Component {
           //   : response.data.access
           //   ? response.data.access
           //   : [];
+          var today = new Date();
+          var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+          localStorage.setItem("time",today.getHours());
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("name", displayName);
           localStorage.setItem("access", access);

@@ -239,7 +239,9 @@ class Home extends Component {
           setLogout={this.getLogout}
         />
         <div className="main-content">
+        
           <Nav title={this.state.title} setLogout={this.getLogout} />
+          <button type="button"><i class="fas fa-bars"></i></button>
           <div className="header bg-gradient-primary pb-8 pt-5 pt-md-8">
             <div className="container-fluid">
               <div className="header-body">

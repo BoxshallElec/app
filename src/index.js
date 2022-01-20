@@ -23,7 +23,7 @@ ReactDOM.render(
         <Route exact path="/register" component={AddEmployee} />
         <PrivateRoute exact path="/changePassword" component={ChangePassword} />
         <PrivateRoute exact path="/Home" component={Home} />
-        <PrivateRoute exact path="/" component={Login} />
+        <PrivateRoute exact path="/" component={Home} />
         <PrivateRoute exact path="" component={Home} />
       </Switch>
     </Router>
@@ -32,14 +32,28 @@ ReactDOM.render(
 );
 
 function PrivateRoute({ component: Component, ...rest }) {
+  console.log("LS");
+  console.log(localStorage);
+  var today_val = new Date().getHours();
+  // var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var session_var = 0;
+  var timeold = parseInt(localStorage.getItem("time"));
+  console.log("today");
+  console.log(today_val);
+  console.log("timeold");
+  console.log(timeold);
+  if((today_val-timeold)==0)
+    session_var = 1;
   return (
+    
     <Route
       {...rest}
+      
       render={props =>
-        localStorage.getItem("token") ? (
+        session_var ? (
           <Component {...props} />
         ) : (
-          // console.log(props)
+          
             <Redirect
             
               to={{ pathname: "/login", state: { from: props.location } }}
