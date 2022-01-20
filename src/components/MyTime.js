@@ -1495,8 +1495,28 @@ class MyTime extends Component {
     ) : (
       
       <React.Fragment>
+        
+          <button className="btn btn-icon btn-3 btn-primary text-right"
+                type="button"
+                data-toggle="modal"
+                data-target="#call-modal-form">
+                  <span className="btn-inner--icon">
+                    <Icon
+                      path={mdiPlus}
+                      title="Dashboard"
+                      size={1}
+                      horizontal
+                      vertical
+                      rotate={180}
+                      color="#ffffff"
+                    />
+                  </span>
+                  <span className="btn-inner--text">ADD</span>
+              </button>
+              <br></br><br></br>
         {console.log("ROWSTSS")}
         {console.log(this.state.timesheetss.columns)}
+        
         <Paper>
                         <Grid rows={rows} columns={columns} >
                         <SelectionState
@@ -1562,55 +1582,7 @@ class MyTime extends Component {
         {console.log(this.state.timesheetss)}
        
         <div className="text-right">
-          <table>
-            <tr>
-              <td>
-                {/* <form onSubmit={this.chooseColumn}>
-                  <select
-                                      multiple
-                                      className="form-control input-group input-group-alternative"
-                                      // className="chosen-select"
-                                      id="tableList"
-                                      
-                                      // value={this.state.clientValue}
-                                      // onChange={this.handleClientChange}
-                                    >
-                                      <option value="default">Choose Columns</option>
-                                      <option>Hours</option>
-                                      <option>BillableStatus</option>
-                                      <option>CustomerRef</option>
-                                      <option>Description</option>
-                                      <option>images</option>
-                                      <option>status</option>
-                    </select>
-                  <input type="submit"></input>
-                </form> */}
-                {/* <form onSubmit={this.chooseColumn}> */}
-                  {/* <Select options={options} isMulti id="tableList" onChange={this.chooseColumn} styles={selectWidth}/> */}
-                  {/* <input type="submit"></input>
-                </form> */}
-              </td>
-              <td>
-              <button className="btn btn-icon btn-3 btn-primary text-right"
-                type="button"
-                data-toggle="modal"
-                data-target="#call-modal-form">
-                  <span className="btn-inner--icon">
-                    <Icon
-                      path={mdiPlus}
-                      title="Dashboard"
-                      size={1}
-                      horizontal
-                      vertical
-                      rotate={180}
-                      color="#ffffff"
-                    />
-                  </span>
-                  <span className="btn-inner--text">ADD</span>
-              </button>
-              </td>
-            </tr>
-          </table>
+          
           <div
             className="modal fade"
             id="call-modal-form"
