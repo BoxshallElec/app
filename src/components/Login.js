@@ -74,7 +74,7 @@ class Login extends Component {
           if (response.data.employee.isFirstTime) {
             self.props.history.push("/changePassword");
           } else {
-            self.props.history.push("/");
+            self.props.history.push("/Home");
           }
         } else {
           self.setState({ loading: false });

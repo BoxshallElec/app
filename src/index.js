@@ -22,7 +22,8 @@ ReactDOM.render(
         <Route exact path="/login" component={Login} />
         <Route exact path="/register" component={AddEmployee} />
         <PrivateRoute exact path="/changePassword" component={ChangePassword} />
-        <PrivateRoute exact path="/" component={Home} />
+        <PrivateRoute exact path="/Home" component={Home} />
+        <PrivateRoute exact path="/" component={Login} />
         <PrivateRoute exact path="" component={Home} />
       </Switch>
     </Router>
@@ -38,7 +39,9 @@ function PrivateRoute({ component: Component, ...rest }) {
         localStorage.getItem("token") ? (
           <Component {...props} />
         ) : (
+          // console.log(props)
             <Redirect
+            
               to={{ pathname: "/login", state: { from: props.location } }}
             />
           )

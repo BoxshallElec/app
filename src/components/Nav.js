@@ -23,6 +23,7 @@ class Nav extends Component {
         id="navbar-main"
       >
         <div className="container-fluid">
+        <button type="button"><i class="fas fa-bars"></i></button>
           <a
             className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
             href="/"
@@ -51,6 +52,7 @@ class Nav extends Component {
                   </div>
                 </div>
               </a>
+              
               <div className="dropdown-menu dropdown-menu-arrow dropdown-menu-right">
                 <div className=" dropdown-header noti-title">
                   <h6 className="text-overflow m-0">Welcome!</h6>
@@ -70,6 +72,8 @@ class Nav extends Component {
                   <i className="ni ni-user-run" />
                   <span>Logout</span>
                 </a>
+                
+
               </div>
             </li>
           </ul>
